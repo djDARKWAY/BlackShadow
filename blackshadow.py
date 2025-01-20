@@ -1,7 +1,7 @@
 import os
 import sys
 import subprocess
-
+'''
 os.system('cls' if os.name == 'nt' else 'clear')
 print("Verifiying dependencies...")
 print("--------------------------------------")
@@ -19,9 +19,10 @@ for package in requiredPackages:
         __import__(package)
     except ImportError:
         installPackage(package)
-
+'''
 import curses
-from browsers.operaGX import getPasswords
+from browsers.operaGX import getPasswords as getPaswwordsOperaGX
+from browsers.chrome import getPasswords as getPaswwordsChrome
 
 os.system('cls' if os.name == 'nt' else 'clear')
 
@@ -85,6 +86,7 @@ def mainMenuControl():
 def submenuBrowsers():
     options = [
         ("1", "Opera GX"),
+        ("2", "Google Chrome"),
         ("0", "Back")
     ]
     currentOption = 0
@@ -104,7 +106,9 @@ def main():
     if choice == '1':
         subchoice = submenuBrowsers()
         if subchoice == '1':
-            getPasswords()
+            getPaswwordsOperaGX()
+        elif subchoice == '2':
+            getPaswwordsChrome()
         elif subchoice == '0':
             main()
     elif choice == '0':
