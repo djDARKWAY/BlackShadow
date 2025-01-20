@@ -1,5 +1,26 @@
-import curses
 import os
+import sys
+import subprocess
+
+os.system('cls' if os.name == 'nt' else 'clear')
+print("Verifiying dependencies...")
+print("--------------------------------------")
+def readRequirements():
+    with open("requirements.txt", "r") as f:
+        return f.read().splitlines()
+def installPackage(package):
+    subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+def uninstallPackage(package):
+    subprocess.check_call([sys.executable, "-m", "pip", "uninstall", "-y", package])
+
+requiredPackages = readRequirements()
+for package in requiredPackages:
+    try:
+        __import__(package)
+    except ImportError:
+        installPackage(package)
+
+import curses
 from browsers.operaGX import getPasswords
 
 os.system('cls' if os.name == 'nt' else 'clear')
@@ -23,9 +44,9 @@ def displayMenu(screen, options, currentOption, title):
     curses.start_color()
     curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
     showLogo(screen)
-    title_start_y = 10
-    title_start_x = 5
-    screen.addstr(title_start_y, title_start_x, title, curses.color_pair(1) | curses.A_BOLD)
+    titleStartY = 10
+    titleStartX = 5
+    screen.addstr(titleStartY, titleStartX, title, curses.color_pair(1) | curses.A_BOLD)
     menuStartY = 11
     for idx, (option, description) in enumerate(options):
         displayIdx = menuStartY + idx if idx < len(options) - 1 else menuStartY + idx + 1
@@ -72,7 +93,7 @@ def submenuBrowsers():
     def subMenuLogic(screen):
         nonlocal selectedOption, currentOption
         while selectedOption is None:
-            displayMenu(screen, options, currentOption, "SELECT A BROWSER")
+            displayMenu(screen, options, currentOption, "BROWSER")
             key = screen.getch()
             selectedOption, currentOption = handleInput(key, currentOption, options)
     curses.wrapper(subMenuLogic)

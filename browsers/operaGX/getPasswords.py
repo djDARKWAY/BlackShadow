@@ -3,7 +3,7 @@ import sqlite3
 import json
 import base64
 import win32crypt
-from Cryptodome.Cipher import AES
+from Crypto.Cipher import AES
 from utils.ansiColors import RED, RESET
 
 def getPasswords():
