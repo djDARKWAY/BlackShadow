@@ -1,7 +1,6 @@
 import os
 import sys
 import subprocess
-import curses
 '''
 os.system('cls' if os.name == 'nt' else 'clear')
 print("Verifiying dependencies...")
@@ -21,6 +20,7 @@ for package in requiredPackages:
     except ImportError:
         installPackage(package)
 '''
+import curses
 from browsers.operaGX import getPasswords as getPasswordsOperaGX
 from browsers.chrome import getPasswords as getPasswordsChrome
 from browsers.edge import getPasswords as getPasswordsEdge
@@ -90,7 +90,7 @@ def mainMenuControl():
     curses.wrapper(menuLogic)
     return selectedOption
 # Submenus
-def submenuPasswords():
+def subMenuPasswords():
     options = [
         ("1", "Brave"),
         ("2", "Google Chrome"),
@@ -110,7 +110,47 @@ def submenuPasswords():
             selectedOption, currentOption = handleInput(key, currentOption, options)
     curses.wrapper(subMenuLogic)
     return selectedOption
-def submenuSystemInformation():
+def subMenuCookies():
+    options = [
+        ("1", "Brave"),
+        ("2", "Google Chrome"),
+        ("3", "Microsoft Edge"),
+        ("4", "Opera GX"),
+        ("5", "Vivaldi"),
+        ("0", "Back")
+    ]
+    currentOption = 0
+    selectedOption = None
+
+    def subMenuLogic(screen):
+        nonlocal selectedOption, currentOption
+        while selectedOption is None:
+            displayMenu(screen, options, currentOption, "COOKIE SELECTION")
+            key = screen.getch()
+            selectedOption, currentOption = handleInput(key, currentOption, options)
+    curses.wrapper(subMenuLogic)
+    return selectedOption
+def subMenuHistory():
+    options = [
+        ("1", "Brave"),
+        ("2", "Google Chrome"),
+        ("3", "Microsoft Edge"),
+        ("4", "Opera GX"),
+        ("5", "Vivaldi"),
+        ("0", "Back")
+    ]
+    currentOption = 0
+    selectedOption = None
+
+    def subMenuLogic(screen):
+        nonlocal selectedOption, currentOption
+        while selectedOption is None:
+            displayMenu(screen, options, currentOption, "HISTORY SELECTION")
+            key = screen.getch()
+            selectedOption, currentOption = handleInput(key, currentOption, options)
+    curses.wrapper(subMenuLogic)
+    return selectedOption
+def subMenuSystemInformation():
     options = [
         ("1", "System Scan"),
         ("0", "Back")
@@ -129,7 +169,7 @@ def submenuSystemInformation():
         curses.wrapper(subMenuLogic)
         
         if selectedOption == '1':
-            subchoice = submenuSystemScan()
+            subchoice = subMenuSystemScan()
             if subchoice == '0':
                 selectedOption = None
                 continue
@@ -141,6 +181,8 @@ def submenuSystemInformation():
 def subOptionsBrowsers():
     options = [
         ("1", "Passwords"),
+        ("2", "Cookies"),
+        ("3", "History"),
         ("0", "Back")
     ]
     currentOption = 0
@@ -152,20 +194,9 @@ def subOptionsBrowsers():
             displayMenu(screen, options, currentOption, "BROWSER MENU")
             key = screen.getch()
             selectedOption, currentOption = handleInput(key, currentOption, options)
-    
-    while True:
-        curses.wrapper(subMenuLogic)
-        
-        if selectedOption == '1':
-            subchoice = submenuPasswords()
-            if subchoice == '0':
-                selectedOption = None  # Voltar ao menu de navegadores
-                continue
-            else:
-                return subchoice  # Retornar a opção do navegador selecionado
-        elif selectedOption == '0':
-            return selectedOption
-def submenuSystemScan():
+    curses.wrapper(subMenuLogic)
+    return selectedOption
+def subMenuSystemScan():
     options = [
         ("1", "Scan for sensitive files"),
         ("2", "Scan for sensitive data"),
@@ -197,30 +228,91 @@ def main():
         '2': None
     }
 
+    browserCookies = {
+        '1': None,
+        '2': None,
+        '3': None,
+        '4': None,
+        '5': None
+    }
+
+    browserHistory = {
+        '1': None,
+        '2': None,
+        '3': None,
+        '4': None,
+        '5': None
+    }
+
     while True:
         choice = mainMenuControl()
+
         # Browser tool
         if choice == '1':
             while True:
                 subchoice = subOptionsBrowsers()
                 if subchoice == '0':
-                    break
+                    break  # Voltar ao menu principal
 
-                func = browserPasswords.get(subchoice)
-                if func:
-                    try:
-                        func()
-                    except Exception as e:
-                        print(f"{RED}An error occurred: {e}{RESET}")
-                else:
-                    print(f"{RED}Invalid option!{RESET}")
+                # Lógica para Passwords, Cookies, History
+                while True:
+                    if subchoice == '1':  # Passwords
+                        browserChoice = subMenuPasswords()
+                        if browserChoice == '0':
+                            break 
 
-                input("Press Enter to continue...")
-                os.system('cls' if os.name == 'nt' else 'clear')
+                        # Chamar a função associada ao navegador escolhido
+                        func = browserPasswords.get(browserChoice)
+                        if func:
+                            try:
+                                func()  # Executar a função para extrair senhas
+                            except Exception as e:
+                                print(f"{RED}An error occurred: {e}{RESET}")
+                        else:
+                            print(f"{RED}Invalid option!{RESET}")
+
+                        input("Press Enter to continue...")
+                        os.system('cls' if os.name == 'nt' else 'clear')
+
+                    elif subchoice == '2':  # Cookies
+                        browserChoice = subMenuCookies()
+                        if browserChoice == '0':
+                            break 
+
+                        func = browserCookies.get(browserChoice)
+                        if func:
+                            try:
+                                func()  # Chama a função para mostrar cookies
+                            except Exception as e:
+                                print(f"{RED}An error occurred: {e}{RESET}")
+                        else:
+                            print(f"{RED}Invalid option!{RESET}")
+
+                        input("Press Enter to continue...")
+                        os.system('cls' if os.name == 'nt' else 'clear')
+
+                    elif subchoice == '3':  # History
+                        browserChoice = subMenuHistory()
+                        if browserChoice == '0':
+                            break  # Voltar ao menu de browsers
+
+                        func = browserHistory.get(browserChoice)
+                        if func:
+                            try:
+                                func()  # Chama a função para mostrar o histórico
+                            except Exception as e:
+                                print(f"{RED}An error occurred: {e}{RESET}")
+                        else:
+                            print(f"{RED}Invalid option!{RESET}")
+
+                        input("Press Enter to continue...")
+                        os.system('cls' if os.name == 'nt' else 'clear')
+
+            
         # System information        
         elif choice == '2':
             while True:
-                subchoice = submenuSystemInformation()
+                subchoice = subMenuSystemInformation()
                 if subchoice == '0':
                     break
 
