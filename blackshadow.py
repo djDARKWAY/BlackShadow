@@ -43,6 +43,7 @@ def showLogo(screen):
     screen.addstr(logo)
     screen.refresh()
 
+# Menu functions and logic
 def displayMenu(screen, options, currentOption, title):
     screen.clear()
     curses.curs_set(0)
@@ -72,8 +73,8 @@ def handleInput(key, currentOption, options):
     return None, currentOption
 def mainMenuControl():
     options = [
-        ("1", "Browsers"),
-        ("2", "System Information"),
+        ("1", "Browser tools"),
+        ("2", "System information"),
         ("0", "Exit")
     ]
     currentOption = 0
@@ -88,7 +89,7 @@ def mainMenuControl():
 
     curses.wrapper(menuLogic)
     return selectedOption
-
+# Submenus
 def submenuPasswords():
     options = [
         ("1", "Brave"),
@@ -109,8 +110,35 @@ def submenuPasswords():
             selectedOption, currentOption = handleInput(key, currentOption, options)
     curses.wrapper(subMenuLogic)
     return selectedOption
+def submenuSystemInformation():
+    options = [
+        ("1", "System Scan"),
+        ("0", "Back")
+    ]
+    currentOption = 0
+    selectedOption = None
 
-def submenuBrowsers():
+    def subMenuLogic(screen):
+        nonlocal selectedOption, currentOption
+        while selectedOption is None:
+            displayMenu(screen, options, currentOption, "-")
+            key = screen.getch()
+            selectedOption, currentOption = handleInput(key, currentOption, options)
+    
+    while True:
+        curses.wrapper(subMenuLogic)
+        
+        if selectedOption == '1':
+            subchoice = submenuSystemScan()
+            if subchoice == '0':
+                selectedOption = None
+                continue
+            else:
+                return subchoice
+        elif selectedOption == '0':
+            return selectedOption
+# Suboptions
+def subOptionsBrowsers():
     options = [
         ("1", "Passwords"),
         ("0", "Back")
@@ -137,35 +165,6 @@ def submenuBrowsers():
                 return subchoice  # Retornar a opção do navegador selecionado
         elif selectedOption == '0':
             return selectedOption
-
-def submenuSystemInformation():
-    options = [
-        ("1", "System Scan"),
-        ("0", "Back")
-    ]
-    currentOption = 0
-    selectedOption = None
-
-    def subMenuLogic(screen):
-        nonlocal selectedOption, currentOption
-        while selectedOption is None:
-            displayMenu(screen, options, currentOption, "SYSTEM INFORMATION MENU")
-            key = screen.getch()
-            selectedOption, currentOption = handleInput(key, currentOption, options)
-    
-    while True:
-        curses.wrapper(subMenuLogic)
-        
-        if selectedOption == '1':
-            subchoice = submenuSystemScan()
-            if subchoice == '0':
-                selectedOption = None
-                continue
-            else:
-                return subchoice
-        elif selectedOption == '0':
-            return selectedOption
-
 def submenuSystemScan():
     options = [
         ("1", "Scan for sensitive files"),
@@ -200,10 +199,10 @@ def main():
 
     while True:
         choice = mainMenuControl()
-        # Browsers
+        # Browser tool
         if choice == '1':
             while True:
-                subchoice = submenuBrowsers()
+                subchoice = subOptionsBrowsers()
                 if subchoice == '0':
                     break
 
@@ -212,13 +211,13 @@ def main():
                     try:
                         func()
                     except Exception as e:
-                        print(f"{RED}Ocorreu um erro: {e}{RESET}")
+                        print(f"{RED}An error occurred: {e}{RESET}")
                 else:
-                    print(f"{RED}Opção inválida!{RESET}")
+                    print(f"{RED}Invalid option!{RESET}")
 
-                input("Pressione Enter para continuar...")
+                input("Press Enter to continue...")
                 os.system('cls' if os.name == 'nt' else 'clear')
-                return submenuPasswords()
+        # System information        
         elif choice == '2':
             while True:
                 subchoice = submenuSystemInformation()
@@ -230,13 +229,12 @@ def main():
                     try:
                         func()
                     except Exception as e:
-                        print(f"{RED}Ocorreu um erro: {e}{RESET}")
+                        print(f"{RED}An error occurred: {e}{RESET}")
                 else:
-                    print(f"{RED}Opção inválida!{RESET}")
+                    print(f"{RED}Invalid option!{RESET}")
 
-                    input("Pressione Enter para continuar...")
-                    os.system('cls' if os.name == 'nt' else 'clear')
-                    return submenuSystemScan()
+                input("Press Enter to continue...")
+                os.system('cls' if os.name == 'nt' else 'clear')
         elif choice == '0':
             os.system('cls' if os.name == 'nt' else 'clear')
             break
