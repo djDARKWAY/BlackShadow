@@ -45,6 +45,3 @@ def getPasswords():
         conn.close()
     except Exception as e:
         print(f"{RED}General error: {e}{RESET}")
-
-if __name__ == "__main__":
-    getPasswords()

