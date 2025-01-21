@@ -25,6 +25,8 @@ from browsers.operaGX import getPasswords as getPasswordsOperaGX
 from browsers.chrome import getPasswords as getPasswordsChrome
 from browsers.edge import getPasswords as getPasswordsEdge
 from browsers.brave import getPasswords as getPasswordsBrave
+from browsers.vivaldi import getPasswords as getPasswordsVivaldi
+from utils.ansiColors import RED, RESET
 
 os.system('cls' if os.name == 'nt' else 'clear')
 
@@ -79,7 +81,7 @@ def mainMenuControl():
     def menuLogic(screen):
         nonlocal selectedOption, currentOption
         while selectedOption is None:
-            displayMenu(screen, options, currentOption, "MENU")
+            displayMenu(screen, options, currentOption, "MAIN MENU")
             key = screen.getch()
             selectedOption, currentOption = handleInput(key, currentOption, options)
 
@@ -87,10 +89,11 @@ def mainMenuControl():
     return selectedOption
 def submenuBrowsers():
     options = [
-        ("1", "Opera GX"),
+        ("1", "Brave"),
         ("2", "Google Chrome"),
         ("3", "Microsoft Edge"),
-        ("4", "Brave"),
+        ("4", "Opera GX"),
+        ("5", "Vivaldi"),
         ("0", "Back")
     ]
     currentOption = 0
@@ -99,28 +102,34 @@ def submenuBrowsers():
     def subMenuLogic(screen):
         nonlocal selectedOption, currentOption
         while selectedOption is None:
-            displayMenu(screen, options, currentOption, "BROWSER")
+            displayMenu(screen, options, currentOption, "BROWSER SELECTION")
             key = screen.getch()
             selectedOption, currentOption = handleInput(key, currentOption, options)
     curses.wrapper(subMenuLogic)
     return selectedOption
 
 def main():
-    choice = mainMenuControl()
-    if choice == '1':
-        subchoice = submenuBrowsers()
-        if subchoice == '1':
-            getPasswordsOperaGX()
-        elif subchoice == '2':
-            getPasswordsChrome()
-        elif subchoice == '3':
-            getPasswordsEdge()
-        elif subchoice == '4':
-            getPasswordsBrave()
-        elif subchoice == '0':
-            main()
-    elif choice == '0':
-        exit()
+    while True:
+        choice = mainMenuControl()
+        if choice == '1':
+            subchoice = submenuBrowsers()
+            try:
+                if subchoice == '1':
+                    getPasswordsBrave()
+                elif subchoice == '2':
+                    getPasswordsChrome()
+                elif subchoice == '3':
+                    getPasswordsEdge()
+                elif subchoice == '4':
+                    getPasswordsOperaGX()
+                elif subchoice == '5':
+                    getPasswordsVivaldi()
+                elif subchoice == '0':
+                    main()
+            except Exception as e:
+                print(f"{RED}Ocorreu um erro: {e}{RESET}")
+        elif choice == '0':
+            exit()
 
 if __name__ == "__main__":
     main()
