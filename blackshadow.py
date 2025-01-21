@@ -24,6 +24,7 @@ import curses
 from browsers.operaGX import getPasswords as getPasswordsOperaGX
 from browsers.chrome import getPasswords as getPasswordsChrome
 from browsers.edge import getPasswords as getPasswordsEdge
+from browsers.brave import getPasswords as getPasswordsBrave
 
 os.system('cls' if os.name == 'nt' else 'clear')
 
@@ -89,6 +90,7 @@ def submenuBrowsers():
         ("1", "Opera GX"),
         ("2", "Google Chrome"),
         ("3", "Microsoft Edge"),
+        ("4", "Brave"),
         ("0", "Back")
     ]
     currentOption = 0
@@ -113,6 +115,8 @@ def main():
             getPasswordsChrome()
         elif subchoice == '3':
             getPasswordsEdge()
+        elif subchoice == '4':
+            getPasswordsBrave()
         elif subchoice == '0':
             main()
     elif choice == '0':
