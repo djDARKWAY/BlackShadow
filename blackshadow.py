@@ -183,7 +183,13 @@ def showHardwareDetails():
     for i, disk in enumerate(diskInfo, start=1):
         connector = "└" if i == len(diskInfo) else "├"
         print(f"  {connector} [{disk['filesystem']}] {disk['mountPoint']} - Total: {disk['total']} GB (Used: {disk['used']} GB | Free: {disk['free']} GB)")
-
+def showMonitorDetails():
+    monitorInfo = hardwareInfo.getMonitor()
+    print("\Monitors:")
+    for i, monitor in enumerate(monitorInfo, start=1):
+        print(f"► Monitor {i}")
+        print(f"  ├ {monitor['displayIdentifier']} - {monitor['monitorName']}")
+        print(f"  └ Resolution: {monitor['resolution']}x{monitor['resolutionHeight']}")
 
 # Secondary functions
 def pauseAndClear():
@@ -225,7 +231,7 @@ def main():
             systemFunctions = {
                 '1': showSystemDetails,
                 '2': showHardwareDetails,
-                '3': lambda: print("Screen Information function not implemented")
+                '3': showMonitorDetails
             }
             if subOption in systemFunctions:
                 systemFunctions[subOption]()
