@@ -22,7 +22,7 @@ for package in requiredPackages:
 '''
 import curses
 from browsers import operaGX, chrome, edge, brave, vivaldi
-from recon import systemInformation
+from recon import systemInfo, hardwareInfo
 
 from utils.ansiColors import RED, RESET
 
@@ -148,15 +148,46 @@ def subOptionsSystemInformation():
 
 # Main functions
 def showSystemDetails():
-    print(f"Username: {systemInformation.getUsername()}")
-    print(f"Computer Name: {systemInformation.getComputerName()}")
-    print(f"OS Version: {systemInformation.getOsVersion()}")
-    print(f"Architecture: {systemInformation.getArchitecture()}")
-    print(f"Domain: {systemInformation.getDomain()}")
+    print(f"Username: {systemInfo.getUsername()}")
+    print(f"Computer Name: {systemInfo.getComputerName()}")
+    print(f"OS Version: {systemInfo.getOsVersion()}")
+    print(f"Architecture: {systemInfo.getArchitecture()}")
+    print(f"Domain: {systemInfo.getDomain()}\n")
+def showHardwareDetails():
+    # CPU Information
+    cpuInfo = hardwareInfo.getCpu()
+    print("CPU:")
+    print(f"► {cpuInfo['cpuModel']}")
+    print(f"  └ Cores: {cpuInfo['cores']} ({cpuInfo['threads']} threads)")
+
+    # GPU Information
+    gpuInfo = hardwareInfo.getGpu()
+    print("\nGPU:")
+    for gpu in gpuInfo:
+        print(f"► {gpu['gpuModel']}")
+        print(f"  ├ VRAM: {gpu['memory']:.2f} MB")
+        print(f"  └ Driver version: {gpu['driverVersion']}")
+
+    # RAM Information
+    ramInfo = hardwareInfo.getRam()
+    print("\nRAM:")
+    print(f"► Total RAM: {ramInfo[0]['totalRam']:.2f} GB")
+    for i, ram in enumerate(ramInfo[1:], start=1):
+        connector = "└" if i == len(ramInfo) - 1 else "├"
+        print(f"  {connector} RAM {i}: {ram['capacity']:.0f} GB - {ram['speed']}MHz {ram['type']} | {ram['manufacturer']} {ram['ramModel']}")
+
+    # Disk Information
+    diskInfo = hardwareInfo.getDisks()
+    print("\nDisks:")
+    print(f"► Total Memory: {sum(disk['total'] for disk in diskInfo)} GB")
+    for i, disk in enumerate(diskInfo, start=1):
+        connector = "└" if i == len(diskInfo) else "├"
+        print(f"  {connector} [{disk['filesystem']}] {disk['mountPoint']} - Total: {disk['total']} GB (Used: {disk['used']} GB | Free: {disk['free']} GB)")
+
 
 # Secondary functions
 def pauseAndClear():
-    input("\n---------------------------\nPress Enter to continue...")
+    input("---------------------------\nPress Enter to continue...")
     os.system('cls' if os.name == 'nt' else 'clear')
 
 def main():
@@ -166,6 +197,7 @@ def main():
         # Browser Tools
         if choice == '1':
             subChoice = subMenuBrowsers()
+
             if subChoice == '1': # Passwords
                 subOption = subOptionsBrowsers()
                 browserFunctions = {
@@ -177,8 +209,10 @@ def main():
                 }
                 if subOption in browserFunctions:
                     browserFunctions[subOption]()
-                elif subOption == '0':
+
+                elif subOption == '0': # Back
                     continue
+
                 pauseAndClear()
             
             elif subChoice == '0': # Back
@@ -187,15 +221,18 @@ def main():
         # System Information
         if choice == '2':
             subOption = subOptionsSystemInformation()
+            
             systemFunctions = {
                 '1': showSystemDetails,
-                '2': lambda: print("Hardware Information function not implemented"),
+                '2': showHardwareDetails,
                 '3': lambda: print("Screen Information function not implemented")
             }
             if subOption in systemFunctions:
                 systemFunctions[subOption]()
-            elif subOption == '0':
+
+            elif subOption == '0': # Back
                 continue
+            
             pauseAndClear()
 
         # Exit the program
