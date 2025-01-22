@@ -1,5 +1,6 @@
 import wmi
 import subprocess as sp
+import pyopencl as cl
 
 def getGpu():
     w = wmi.WMI()
@@ -12,7 +13,7 @@ def getGpu():
             if "NVIDIA" in gpu.Name:
                 memory = getNvidiaMemory()
             elif "AMD" in gpu.Name:
-                memory = getAmdMemory(gpu.Name)
+                memory = getAmdMemory()
             else:
                 memory = 0.0
 
@@ -33,11 +34,11 @@ def getNvidiaMemory():
     except (sp.CalledProcessError, FileNotFoundError):
         return 0.0
 
-def getAmdMemory(gpuName):
-    try:
-        command = f"wmic path win32_videocontroller where \"caption='{gpuName}'\" get AdapterRAM"
-        memoryInfo = sp.check_output(command, shell=True).decode('ascii').strip().split("\n")[-1]
-        memory = int(memoryInfo) / (1024 ** 2)
-        return memory
-    except (sp.CalledProcessError, FileNotFoundError, ValueError):
-        return 0.0
+def getAmdMemory():
+    platforms = cl.get_platforms()
+    for platform in platforms:
+        if "AMD" in platform.name:
+            devices = platform.get_devices()
+            for device in devices:
+                return device.global_mem_size / (1024 ** 2)
+    return 0.0
