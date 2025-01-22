@@ -235,7 +235,7 @@ def main():
             
             pauseAndClear()
 
-        # Exit the program
+        # Exit
         elif choice == '0':
             os.system('cls' if os.name == 'nt' else 'clear')
             break
