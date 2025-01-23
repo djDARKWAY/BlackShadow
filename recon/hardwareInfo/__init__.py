@@ -3,3 +3,4 @@ from .gpu import getGpu
 from .ram import getRam
 from .disks import getDisks
 from .monitor import getMonitor
+from .motherboard import getMotherboardInfo

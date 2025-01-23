@@ -3,3 +3,7 @@ from .domain import getDomain
 from .osVersion import getOsVersion
 from .platform import getArchitecture
 from .username import getUsername
+from .timezone import getDateTimeInfo
+from .language import getLanguage
+from .bios import getBiosInfo
+from .directX import getDirectXVersion

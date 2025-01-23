@@ -8,7 +8,8 @@ def getCpu():
     processorInfo = {
         "cpuModel": cpuModel,
         "cores": psutil.cpu_count(logical=False),
-        "threads": psutil.cpu_count(logical=True)
+        "threads": psutil.cpu_count(logical=True),
+        "baseClock": c.query("SELECT * FROM Win32_Processor")[0].MaxClockSpeed / 1000
     }
 
     return processorInfo

@@ -152,13 +152,24 @@ def showSystemDetails():
     print(f"Computer Name: {systemInfo.getComputerName()}")
     print(f"OS Version: {systemInfo.getOsVersion()}")
     print(f"Architecture: {systemInfo.getArchitecture()}")
-    print(f"Domain: {systemInfo.getDomain()}\n")
+    print(f"Domain: {systemInfo.getDomain()}")
+    print(f"Date & Time: {systemInfo.getDateTimeInfo()['currentDate']} {systemInfo.getDateTimeInfo()['currentTime']}")
+    print(f"Timezone: {systemInfo.getDateTimeInfo()['timezone']}")
+    print(f"Language: {systemInfo.getLanguage()}")
+    print(f"DirectX Version: {systemInfo.getDirectXVersion()}")
+    print(f"BIOS Information:")
+    print(f"► Manufacturer: {systemInfo.getBiosInfo()['manufacturer']}")
+    print(f"► Version: {systemInfo.getBiosInfo()['version']}")
+    print(f"► Release Date: {systemInfo.getBiosInfo()['releaseDate']}")
+    print(f"► Serial Number: {systemInfo.getBiosInfo()['serialNumber']}")
+    
 def showHardwareDetails():
     # CPU Information
     cpuInfo = hardwareInfo.getCpu()
     print("CPU:")
     print(f"► {cpuInfo['cpuModel']}")
-    print(f"  └ Cores: {cpuInfo['cores']} ({cpuInfo['threads']} threads)")
+    print(f"  ├ Cores: {cpuInfo['cores']} ({cpuInfo['threads']} threads)")
+    print(f"  └ Base Clock: {cpuInfo['baseClock']} GHz")
 
     # GPU Information
     gpuInfo = hardwareInfo.getGpu()
@@ -166,7 +177,7 @@ def showHardwareDetails():
     for gpu in gpuInfo:
         print(f"► {gpu['gpuModel']}")
         print(f"  ├ VRAM: {gpu['memory']:.2f} MB")
-        print(f"  └ Driver version: {gpu['driverVersion']}")
+        print(f"  └ Driver Version: {gpu['driverVersion']}")
 
     # RAM Information
     ramInfo = hardwareInfo.getRam()
@@ -183,6 +194,14 @@ def showHardwareDetails():
     for i, disk in enumerate(diskInfo, start=1):
         connector = "└" if i == len(diskInfo) else "├"
         print(f"  {connector} [{disk['filesystem']}] {disk['mountPoint']} - Total: {disk['total']} GB (Used: {disk['used']} GB | Free: {disk['free']} GB)")
+        
+    # Motherboard Information
+    motherboardInfo = hardwareInfo.getMotherboardInfo()
+    print("\nMotherboard:")
+    print(f"► {motherboardInfo['model']}")
+    print(f"  ├ Manufacturer: {motherboardInfo['manufacturer']}")
+    print(f"  ├ Boot Mode: {motherboardInfo['bootMode']}")
+    print(f"  └ Secure Boot: {motherboardInfo['secureBoot']}")
 def showMonitorDetails():
     monitorInfo = hardwareInfo.getMonitor()
     print("\nMonitors:")
