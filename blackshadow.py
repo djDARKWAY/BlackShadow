@@ -185,11 +185,15 @@ def showHardwareDetails():
         print(f"  {connector} [{disk['filesystem']}] {disk['mountPoint']} - Total: {disk['total']} GB (Used: {disk['used']} GB | Free: {disk['free']} GB)")
 def showMonitorDetails():
     monitorInfo = hardwareInfo.getMonitor()
-    print("\Monitors:")
+    print("\nMonitors:")
     for i, monitor in enumerate(monitorInfo, start=1):
         print(f"► Monitor {i}")
-        print(f"  ├ {monitor['displayIdentifier']} - {monitor['monitorName']}")
-        print(f"  └ Resolution: {monitor['resolution']}x{monitor['resolutionHeight']}")
+        print(f"  ├ Identifier: {monitor['displayIdentifier']}")
+        print(f"  ├ Name: {monitor['monitorName']}")
+        print(f"  ├ Resolution: {monitor['resolution']}")
+        print(f"  ├ Refresh Rate: {monitor['refreshRate']}Hz")
+        print(f"  └ Output: {monitor['output']}")
+
 
 # Secondary functions
 def pauseAndClear():
