@@ -91,6 +91,7 @@ def mainMenuControl():
 def subMenuBrowsers():
     options = [
         ("1", "Passwords"),
+        ("2", "Cookies"),
         ("0", "Back")
     ]
     currentOption = 0
@@ -242,6 +243,20 @@ def main():
                 elif subOption == '0': # Back
                     continue
 
+                pauseAndClear()
+            elif subChoice == '2': # Cookies
+                subOption = subOptionsBrowsers()
+                browserFunctions = {
+
+                    '3': edge.getCookies,
+
+                }
+                if subOption in browserFunctions:
+                    browserFunctions[subOption]()
+
+                elif subOption == '0':
+                    continue
+                
                 pauseAndClear()
             
             elif subChoice == '0': # Back
