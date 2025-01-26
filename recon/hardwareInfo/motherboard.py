@@ -22,7 +22,7 @@ def getBootMode():
     except Exception as e:
         return f"Unknown ({e})"
 
-def getMotherboardInfo():
+def getMotherboard():
     c = wmi.WMI()
     board = c.Win32_BaseBoard()[0]
     

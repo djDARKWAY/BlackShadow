@@ -7,29 +7,27 @@ def getMonitor():
     w = wmi.WMI()
     monitors = []
 
-    # Pegar monitores físicos (PnP)
     pnpMonitors = w.query("SELECT * FROM Win32_PnPEntity WHERE Description LIKE '%Monitor%'")
     videoControllers = w.query("SELECT * FROM Win32_VideoController")
 
-    dxdiag_data = getMonitorViaDxDiag()
+    dxdiagData = getMonitorViaDxDiag()
 
     for idx, monitor in enumerate(pnpMonitors):
         try:
             if "Monitor" not in monitor.Name or "WAN Miniport" in monitor.Name:
                 continue
 
-            clean_name = re.sub(r'Generic Monitor\s*\((.*?)\)', r'\1', monitor.Name).strip()
+            cleanName = re.sub(r'Generic Monitor\s*\((.*?)\)', r'\1', monitor.Name).strip()
 
-            # Garantir que o índice de videoControllers seja válido
             video = videoControllers[idx] if idx < len(videoControllers) else None
-            dxdiag_info = dxdiag_data[idx] if idx < len(dxdiag_data) else {}
+            dxdiagInfo = dxdiagData[idx] if idx < len(dxdiagData) else {}
 
-            resolution = f"{video.CurrentHorizontalResolution}x{video.CurrentVerticalResolution}" if video else dxdiag_info.get("resolution", "Unknown")
-            refreshRate = video.CurrentRefreshRate if video and video.CurrentRefreshRate != 0 else dxdiag_info.get("refreshRate", "Unknown")
-            output = dxdiag_info.get("output", "Unknown")
+            resolution = f"{video.CurrentHorizontalResolution}x{video.CurrentVerticalResolution}" if video else dxdiagInfo.get("resolution", "Unknown")
+            refreshRate = video.CurrentRefreshRate if video and video.CurrentRefreshRate != 0 else dxdiagInfo.get("refreshRate", "Unknown")
+            output = dxdiagInfo.get("output", "Unknown")
 
             monitors.append({
-                "monitorName": clean_name,
+                "monitorName": cleanName,
                 "displayIdentifier": f"\\\\.\\DISPLAY{idx + 1}",
                 "resolution": resolution,
                 "refreshRate": refreshRate,
@@ -48,36 +46,36 @@ def getMonitor():
 
 def getMonitorViaDxDiag():
     try:
-        dxdiag_file = "dxdiag_output.txt"
+        dxdiagFile = "dxdiag_output.txt"
         
-        subprocess.run(f"dxdiag /t {dxdiag_file}", shell=True, check=True)
+        subprocess.run(f"dxdiag /t {dxdiagFile}", shell=True, check=True)
 
-        with open(dxdiag_file, "r") as file:
-            dxdiag_data = file.readlines()
+        with open(dxdiagFile, "r") as file:
+            dxdiagData = file.readlines()
 
-        monitor_info = []
-        current_monitor = {}
+        monitorInfo = []
+        currentMonitor = {}
 
-        for line in dxdiag_data:
+        for line in dxdiagData:
             if "Monitor Model" in line:
-                current_monitor["monitorName"] = line.split(":")[1].strip()
+                currentMonitor["monitorName"] = line.split(":")[1].strip()
 
             elif "Current Mode" in line:
-                mode_match = re.search(r'(\d+) x (\d+)', line)
-                refresh_match = re.search(r'(\d+)Hz', line)
-                if mode_match:
-                    current_monitor["resolution"] = f"{mode_match.group(1)}x{mode_match.group(2)}"
-                if refresh_match:
-                    current_monitor["refreshRate"] = refresh_match.group(1)
+                modeMatch = re.search(r'(\d+) x (\d+)', line)
+                refreshMatch = re.search(r'(\d+)Hz', line)
+                if modeMatch:
+                    currentMonitor["resolution"] = f"{modeMatch.group(1)}x{modeMatch.group(2)}"
+                if refreshMatch:
+                    currentMonitor["refreshRate"] = refreshMatch.group(1)
 
             elif "Output Type" in line:
-                current_monitor["output"] = line.split(":")[1].strip()
-                monitor_info.append(current_monitor)
-                current_monitor = {}
+                currentMonitor["output"] = line.split(":")[1].strip()
+                monitorInfo.append(currentMonitor)
+                currentMonitor = {}
 
-        os.remove(dxdiag_file)  
-        return monitor_info
+        os.remove(dxdiagFile)  
+        return monitorInfo
 
     except Exception as e:
-        print("Erro ao executar dxdiag:", e)
+        print("Error executing dxdiag:", e)
         return []

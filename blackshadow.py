@@ -87,7 +87,7 @@ def mainMenuControl():
 
     curses.wrapper(menuLogic)
     return selectedOption
-# Sub Menus ("subMenu" is an intermediary between a menu and final options to activate a feature)
+# Sub Menus (intermediary between a menu and final options to activate a feature)
 def subMenuBrowsers():
     options = [
         ("1", "Passwords"),
@@ -106,7 +106,7 @@ def subMenuBrowsers():
 
     curses.wrapper(menuLogic)
     return selectedOption
-# Sub Options ("subOption" is a submenu in which the option activates a feature)
+# Sub Options (submenu in which the option activates a feature)
 def subOptionsBrowsers():
     options = [
         ("1", "Brave"),
@@ -146,78 +146,90 @@ def subOptionsSystemInformation():
 
     curses.wrapper(menuLogic)
     return selectedOption
-
 # Main functions
 def showSystemDetails():
-    print(f"Username: {systemInfo.getUsername()}")
-    print(f"Computer Name: {systemInfo.getComputerName()}")
-    print(f"OS Version: {systemInfo.getOsVersion()}")
-    print(f"Architecture: {systemInfo.getArchitecture()}")
-    print(f"Domain: {systemInfo.getDomain()}")
-    print(f"Date & Time: {systemInfo.getDateTimeInfo()['currentDate']} {systemInfo.getDateTimeInfo()['currentTime']}")
-    print(f"Timezone: {systemInfo.getDateTimeInfo()['timezone']}")
-    print(f"Language: {systemInfo.getLanguage()}")
-    print(f"DirectX Version: {systemInfo.getDirectXVersion()}")
-    print(f"BIOS Information:")
-    print(f"► Manufacturer: {systemInfo.getBiosInfo()['manufacturer']}")
-    print(f"► Version: {systemInfo.getBiosInfo()['version']}")
-    print(f"► Release Date: {systemInfo.getBiosInfo()['releaseDate']}")
-    print(f"► Serial Number: {systemInfo.getBiosInfo()['serialNumber']}")
-    
-def showHardwareDetails():
-    # CPU Information
-    cpuInfo = hardwareInfo.getCpu()
-    print("CPU:")
-    print(f"► {cpuInfo['cpuModel']}")
-    print(f"  ├ Cores: {cpuInfo['cores']} ({cpuInfo['threads']} threads)")
-    print(f"  └ Base Clock: {cpuInfo['baseClock']} GHz")
+    systemData = systemInfo.getDateTime()
+    bios = systemInfo.getBios()
 
-    # GPU Information
+    print(f"==================================")
+    print(f"       ** SYSTEM DETAILS **       ")
+    print(f"==================================")
+    print(f"Username         : {systemInfo.getUsername()}")
+    print(f"Computer name    : {systemInfo.getComputerName()}")
+    print(f"OS version       : {systemInfo.getOsVersion()}")
+    print(f"Architecture     : {systemInfo.getArchitecture()}")
+    print(f"Domain           : {systemInfo.getDomain()}")
+    print(f"Date & time      : {systemData['currentDate']} {systemData['currentTime']}")
+    print(f"Timezone         : {systemData['timezone']}")
+    print(f"DirectX version  : {systemInfo.getDirectXVersion()}")
+    print(f"Language         : {systemInfo.getLanguage()}") 
+    print(f"Manufacturer     : {bios['manufacturer']}")
+    print(f"Version          : {bios['version']}")
+    print(f"Release date     : {bios['releaseDate']}")
+    print(f"Serial number    : {bios['serialNumber']}")
+    print(f"==================================")
+def showHardwareDetails():
+    cpuInfo = hardwareInfo.getCpu()
     gpuInfo = hardwareInfo.getGpu()
-    print("\nGPU:")
+    ramInfo = hardwareInfo.getRam()
+    diskInfo = hardwareInfo.getDisks()
+    motherboardInfo = hardwareInfo.getMotherboard()
+
+    print(f"==================================")
+    print(f"      ** HARDWARE DETAILS **      ")
+    print(f"==================================")
+
+    print(f"             ** CPU **             ")
+    print(f"► {cpuInfo['cpuModel']}")
+    print(f"  ├ Cores        : {cpuInfo['cores']} ({cpuInfo['threads']} threads)")
+    print(f"  └ Base clock   : {cpuInfo['baseClock']} GHz")
+
+    print(f"\n             ** GPU **             ")
     for gpu in gpuInfo:
         print(f"► {gpu['gpuModel']}")
-        print(f"  ├ VRAM: {gpu['memory']:.2f} MB")
-        print(f"  └ Driver Version: {gpu['driverVersion']}")
+        print(f"  ├ VRAM         : {gpu['memory']:.2f} MB")
+        print(f"  └ Version      : {gpu['driverVersion']}")
 
-    # RAM Information
-    ramInfo = hardwareInfo.getRam()
-    print("\nRAM:")
-    print(f"► Total RAM: {ramInfo[0]['totalRam']:.2f} GB")
+    print(f"\n             ** RAM **             ")
+    print(f"► RAM memory: {ramInfo[0]['totalRam']:.2f} GB")
     for i, ram in enumerate(ramInfo[1:], start=1):
         connector = "└" if i == len(ramInfo) - 1 else "├"
-        print(f"  {connector} RAM {i}: {ram['capacity']:.0f} GB - {ram['speed']}MHz {ram['type']} | {ram['manufacturer']} {ram['ramModel']}")
+        print(f"  {connector} RAM {i}        : {ram['capacity']:.0f} GB - {ram['speed']}MHz {ram['type']} | {ram['manufacturer']} {ram['ramModel']}")
 
-    # Disk Information
-    diskInfo = hardwareInfo.getDisks()
-    print("\nDisks:")
-    print(f"► Total Memory: {sum(disk['total'] for disk in diskInfo)} GB")
+    print(f"\n            ** DISKS **            ")
+    print(f"► Total memory: {sum(disk['total'] for disk in diskInfo)} GB")
     for i, disk in enumerate(diskInfo, start=1):
         connector = "└" if i == len(diskInfo) else "├"
-        print(f"  {connector} [{disk['filesystem']}] {disk['mountPoint']} - Total: {disk['total']} GB (Used: {disk['used']} GB | Free: {disk['free']} GB)")
+        print(f"  {connector} [{disk['filesystem']}] {disk['mountPoint']}   : Total: {disk['total']} GB (Used: {disk['used']} GB | Free: {disk['free']} GB)")
         
-    # Motherboard Information
-    motherboardInfo = hardwareInfo.getMotherboardInfo()
-    print("\nMotherboard:")
+    print(f"\n         ** MOTHERBOARD **         ")
     print(f"► {motherboardInfo['model']}")
-    print(f"  ├ Manufacturer: {motherboardInfo['manufacturer']}")
-    print(f"  ├ Boot Mode: {motherboardInfo['bootMode']}")
-    print(f"  └ Secure Boot: {motherboardInfo['secureBoot']}")
+    print(f"  ├ Manufacturer : {motherboardInfo['manufacturer']}")
+    print(f"  ├ Boot Mode    : {motherboardInfo['bootMode']}")
+    print(f"  └ Secure Boot  : {motherboardInfo['secureBoot']}")
 def showMonitorDetails():
     monitorInfo = hardwareInfo.getMonitor()
-    print("\nMonitors:")
-    for i, monitor in enumerate(monitorInfo, start=1):
-        print(f"► Monitor {i}")
-        print(f"  ├ Identifier: {monitor['displayIdentifier']}")
-        print(f"  ├ Name: {monitor['monitorName']}")
-        print(f"  ├ Resolution: {monitor['resolution']}")
-        print(f"  ├ Refresh Rate: {monitor['refreshRate']}Hz")
-        print(f"  └ Output: {monitor['output']}")
 
+    print(f"==================================")
+    print(f"       ** MONITOR DETAILS **      ")
+    print(f"==================================")
+
+    if monitorInfo:
+        for i, monitor in enumerate(monitorInfo, start=1):
+            print(f"► Monitor {i}")
+            print(f"  ├ Identifier   : {monitor['displayIdentifier']}")
+            print(f"  ├ Name         : {monitor['monitorName']}")
+            print(f"  ├ Resolution   : {monitor['resolution']}")
+            print(f"  ├ Refresh rate : {monitor['refreshRate']} Hz")
+            print(f"  └ Output       : {monitor['output']}")
+        print(f"===================================")
+    else:
+        print(f"No monitors found.")
+        print(f"===================================")
 
 # Secondary functions
 def pauseAndClear():
-    input("---------------------------\nPress Enter to continue...")
+    input("Press Enter to continue...")
     os.system('cls' if os.name == 'nt' else 'clear')
 
 def main():
@@ -247,9 +259,7 @@ def main():
             elif subChoice == '2': # Cookies
                 subOption = subOptionsBrowsers()
                 browserFunctions = {
-
                     '3': edge.getCookies,
-
                 }
                 if subOption in browserFunctions:
                     browserFunctions[subOption]()

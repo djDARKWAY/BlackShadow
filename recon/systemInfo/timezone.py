@@ -1,16 +1,16 @@
 from datetime import datetime
 import time
 
-def getDateTimeInfo():
+def getDateTime():
 
-    current_datetime = datetime.now()
+    currentDateTime = datetime.now()
 
-    timezone_offset = -time.timezone // 3600
+    timezoneOffset = -time.timezone // 3600
 
-    date_time_info = {
-        "currentDate": current_datetime.strftime("%Y-%m-%d"),
-        "currentTime": current_datetime.strftime("%H:%M:%S"),
-        "timezone": f"UTC{timezone_offset:+d}"
+    dateTimeInfo = {
+        "currentDate": currentDateTime.strftime("%Y-%m-%d"),
+        "currentTime": currentDateTime.strftime("%H:%M:%S"),
+        "timezone": f"UTC{timezoneOffset:+d}"
     }
 
-    return date_time_info
+    return dateTimeInfo
