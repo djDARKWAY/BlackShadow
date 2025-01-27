@@ -24,7 +24,7 @@ import curses
 from browsers import operaGX, chrome, edge, brave, vivaldi
 from recon import systemInfo, hardwareInfo
 
-from utils.ansiColors import RED, RESET
+from utils.ansiColors import BOLD_RED, BOLD_GREEN, RESET
 
 os.system('cls' if os.name == 'nt' else 'clear')
 
@@ -151,23 +151,29 @@ def showSystemDetails():
     systemData = systemInfo.getDateTime()
     bios = systemInfo.getBios()
 
-    print(f"==================================")
-    print(f"       ** SYSTEM DETAILS **       ")
-    print(f"==================================")
-    print(f"Username         : {systemInfo.getUsername()}")
-    print(f"Computer name    : {systemInfo.getComputerName()}")
-    print(f"OS version       : {systemInfo.getOsVersion()}")
-    print(f"Architecture     : {systemInfo.getArchitecture()}")
-    print(f"Domain           : {systemInfo.getDomain()}")
-    print(f"Date & time      : {systemData['currentDate']} {systemData['currentTime']}")
-    print(f"Timezone         : {systemData['timezone']}")
-    print(f"DirectX version  : {systemInfo.getDirectXVersion()}")
-    print(f"Language         : {systemInfo.getLanguage()}") 
-    print(f"Manufacturer     : {bios['manufacturer']}")
-    print(f"Version          : {bios['version']}")
-    print(f"Release date     : {bios['releaseDate']}")
-    print(f"Serial number    : {bios['serialNumber']}")
-    print(f"==================================")
+    print(f"=====================================")
+    print(f"         ** SYSTEM DETAILS **        ")
+    print(f"=====================================")
+
+    details = {
+        "Username": systemInfo.getUsername(),
+        "Computer name": systemInfo.getComputerName(),
+        "OS version": systemInfo.getOsVersion(),
+        "Architecture": systemInfo.getArchitecture(),
+        "Domain": systemInfo.getDomain(),
+        "Date & time": f"{systemData['currentDate']} {systemData['currentTime']}",
+        "Timezone": systemData['timezone'],
+        "DirectX version": systemInfo.getDirectXVersion(),
+        "Language": systemInfo.getLanguage(),
+        "Manufacturer": bios['manufacturer'],
+        "Version": bios['version'],
+        "Release date": bios['releaseDate'],
+        "Serial number": bios['serialNumber']
+    }
+
+    for key, value in details.items():
+        print(f"{BOLD_GREEN}{key:<20}:{RESET} {value}")
+    print(f"=====================================")
 def showHardwareDetails():
     cpuInfo = hardwareInfo.getCpu()
     gpuInfo = hardwareInfo.getGpu()
@@ -175,57 +181,75 @@ def showHardwareDetails():
     diskInfo = hardwareInfo.getDisks()
     motherboardInfo = hardwareInfo.getMotherboard()
 
-    print(f"==================================")
-    print(f"      ** HARDWARE DETAILS **      ")
-    print(f"==================================")
+    print(f"=====================================")
+    print(f"        ** HARDWARE DETAILS **       ")
+    print(f"=====================================")
 
-    print(f"             ** CPU **             ")
-    print(f"► {cpuInfo['cpuModel']}")
-    print(f"  ├ Cores        : {cpuInfo['cores']} ({cpuInfo['threads']} threads)")
-    print(f"  └ Base clock   : {cpuInfo['baseClock']} GHz")
+    print(f"            ** MOTHERBOARD **")
+    details = {
+        "Model": motherboardInfo['model'],
+        "Manufacturer": motherboardInfo['manufacturer'],
+        "Boot Mode": motherboardInfo['bootMode'],
+        "Secure Boot": motherboardInfo['secureBoot']
+    }
+    for key, value in details.items():
+        print(f"{BOLD_GREEN}{key:<20}:{RESET} {value}")
 
-    print(f"\n             ** GPU **             ")
-    for gpu in gpuInfo:
-        print(f"► {gpu['gpuModel']}")
-        print(f"  ├ VRAM         : {gpu['memory']:.2f} MB")
-        print(f"  └ Version      : {gpu['driverVersion']}")
+    print(f"\n                ** CPU **")
+    details = {
+        "Model": cpuInfo['cpuModel'],
+        "Cores/Threads": f"{cpuInfo['cores']}C/{cpuInfo['threads']}T",
+        "Base Clock": f"{cpuInfo['baseClock']} GHz"
+    }
+    for key, value in details.items():
+        print(f"{BOLD_GREEN}{key:<20}:{RESET} {value}")
 
-    print(f"\n             ** RAM **             ")
-    print(f"► RAM memory: {ramInfo[0]['totalRam']:.2f} GB")
+    print(f"\n                ** GPU **")
+    for i, gpu in enumerate(gpuInfo, start=1):
+        print(f"{BOLD_GREEN}GPU {i}:{RESET}")
+        details = {
+            "├ Model": gpu['gpuModel'],
+            "├ VRAM": f"{gpu['memory']:.2f} MB",
+            "└ Driver Version": gpu['driverVersion']
+        }
+        for key, value in details.items():
+            print(f"{BOLD_GREEN}{key:<20}:{RESET} {value}")
+
+    print(f"\n                ** RAM **")
+    print(f"{BOLD_GREEN}Total RAM:{RESET} {ramInfo[0]['totalRam']:.2f} GB")
     for i, ram in enumerate(ramInfo[1:], start=1):
-        connector = "└" if i == len(ramInfo) - 1 else "├"
-        print(f"  {connector} RAM {i}        : {ram['capacity']:.0f} GB - {ram['speed']}MHz {ram['type']} | {ram['manufacturer']} {ram['ramModel']}")
+        connector = "└" if i == len(ramInfo[1:]) else "├"
+        details = f"{ram['capacity']:.0f} GB - {ram['speed']} MHz - {ram['type']} | {ram['manufacturer']} {ram['ramModel']}"
+        print(f"{BOLD_GREEN}{connector} RAM {i:<14}:{RESET} {details}")
 
-    print(f"\n            ** DISKS **            ")
-    print(f"► Total memory: {sum(disk['total'] for disk in diskInfo)} GB")
+    print(f"\n               ** DISKS **")
+    print(f"{BOLD_GREEN}Total Memory:{RESET} {sum(disk['total'] for disk in diskInfo):.2f} GB")
     for i, disk in enumerate(diskInfo, start=1):
         connector = "└" if i == len(diskInfo) else "├"
-        print(f"  {connector} [{disk['filesystem']}] {disk['mountPoint']}   : Total: {disk['total']} GB (Used: {disk['used']} GB | Free: {disk['free']} GB)")
-        
-    print(f"\n         ** MOTHERBOARD **         ")
-    print(f"► {motherboardInfo['model']}")
-    print(f"  ├ Manufacturer : {motherboardInfo['manufacturer']}")
-    print(f"  ├ Boot Mode    : {motherboardInfo['bootMode']}")
-    print(f"  └ Secure Boot  : {motherboardInfo['secureBoot']}")
+        details = f"{disk['total']:.2f} GB (Used: {disk['used']:.2f} GB - Free: {disk['free']:.2f} GB) [{disk['filesystem']}]"
+        print(f"{BOLD_GREEN}{connector} Disk {i:<13}:{RESET} {details}")
 def showMonitorDetails():
     monitorInfo = hardwareInfo.getMonitor()
 
-    print(f"==================================")
-    print(f"       ** MONITOR DETAILS **      ")
-    print(f"==================================")
+    print(f"=====================================")
+    print(f"         ** MONITOR DETAILS **       ")
+    print(f"=====================================")
 
     if monitorInfo:
         for i, monitor in enumerate(monitorInfo, start=1):
-            print(f"► Monitor {i}")
-            print(f"  ├ Identifier   : {monitor['displayIdentifier']}")
-            print(f"  ├ Name         : {monitor['monitorName']}")
-            print(f"  ├ Resolution   : {monitor['resolution']}")
-            print(f"  ├ Refresh rate : {monitor['refreshRate']} Hz")
-            print(f"  └ Output       : {monitor['output']}")
-        print(f"===================================")
+            print(f"{BOLD_GREEN}Monitor {i}:{RESET}")
+            details = {
+                "├ Identifier   ": monitor['displayIdentifier'],
+                "├ Name         ": monitor['monitorName'],
+                "├ Resolution   ": monitor['resolution'],
+                "├ Refresh rate ": f"{monitor['refreshRate']} Hz",
+                "└ Output       ": monitor['output']
+            }
+            for key, value in details.items():
+                print(f"{BOLD_GREEN}{key:<20}:{RESET} {value}")
     else:
-        print(f"No monitors found.")
-        print(f"===================================")
+        print(f"{BOLD_RED}No monitors found.{RESET}")
+    print(f"=====================================")
 
 # Secondary functions
 def pauseAndClear():
