@@ -1,7 +1,7 @@
 import os
 import sys
 import subprocess
-'''
+
 os.system('cls' if os.name == 'nt' else 'clear')
 print("Verifiying dependencies...")
 print("--------------------------------------")
@@ -19,12 +19,12 @@ for package in requiredPackages:
         __import__(package)
     except ImportError:
         installPackage(package)
-'''
+
 import curses
 from browsers import operaGX, chrome, edge, brave, vivaldi
-from recon import systemInfo, hardwareInfo
+from recon import systemInfo, hardwareInfo, networkInfo
 
-from utils.ansiColors import BOLD_RED, BOLD_GREEN, RESET
+from utils.ansiColors import BOLD_RED, BOLD_GREEN, GRAY, RESET
 
 os.system('cls' if os.name == 'nt' else 'clear')
 
@@ -73,6 +73,7 @@ def mainMenuControl():
     options = [
         ("1", "Browser Tools"),
         ("2", "System Information"),
+        ("3", "Network Scanning"),
         ("0", "Exit")
     ]
     currentOption = 0
@@ -146,6 +147,23 @@ def subOptionsSystemInformation():
 
     curses.wrapper(menuLogic)
     return selectedOption
+def subOptionsNetwork():
+    options = [
+        ("1", "IP and Interfaces"),
+        ("0", "Back")
+    ]
+    currentOption = 0
+    selectedOption = None
+
+    def menuLogic(screen):
+        nonlocal selectedOption, currentOption
+        while selectedOption is None:
+            displayMenu(screen, options, currentOption, "NETWORK SCAN")
+            key = screen.getch()
+            selectedOption, currentOption = handleInput(key, currentOption, options)
+
+    curses.wrapper(menuLogic)
+    return selectedOption
 # Main functions
 def showSystemDetails():
     systemData = systemInfo.getDateTime()
@@ -172,7 +190,7 @@ def showSystemDetails():
     }
 
     for key, value in details.items():
-        print(f"{BOLD_GREEN}{key:<20}:{RESET} {value}")
+        print(f"{BOLD_GREEN}{key:<17}:{RESET} {value}")
     print(f"=====================================")
 def showHardwareDetails():
     cpuInfo = hardwareInfo.getCpu()
@@ -185,7 +203,7 @@ def showHardwareDetails():
     print(f"        ** HARDWARE DETAILS **       ")
     print(f"=====================================")
 
-    print(f"            ** MOTHERBOARD **")
+    print(f"{BOLD_GREEN}►{GRAY} MOTHERBOARD:")
     details = {
         "Model": motherboardInfo['model'],
         "Manufacturer": motherboardInfo['manufacturer'],
@@ -193,18 +211,18 @@ def showHardwareDetails():
         "Secure Boot": motherboardInfo['secureBoot']
     }
     for key, value in details.items():
-        print(f"{BOLD_GREEN}{key:<20}:{RESET} {value}")
+        print(f"{BOLD_GREEN}{key:<17}:{RESET} {value}")
 
-    print(f"\n                ** CPU **")
+    print(f"\n{BOLD_GREEN}►{GRAY} CPU:")
     details = {
         "Model": cpuInfo['cpuModel'],
         "Cores/Threads": f"{cpuInfo['cores']}C/{cpuInfo['threads']}T",
         "Base Clock": f"{cpuInfo['baseClock']} GHz"
     }
     for key, value in details.items():
-        print(f"{BOLD_GREEN}{key:<20}:{RESET} {value}")
+        print(f"{BOLD_GREEN}{key:<17}:{RESET} {value}")
 
-    print(f"\n                ** GPU **")
+    print(f"\n{BOLD_GREEN}►{GRAY} GPU:")
     for i, gpu in enumerate(gpuInfo, start=1):
         print(f"{BOLD_GREEN}GPU {i}:{RESET}")
         details = {
@@ -213,21 +231,23 @@ def showHardwareDetails():
             "└ Driver Version": gpu['driverVersion']
         }
         for key, value in details.items():
-            print(f"{BOLD_GREEN}{key:<20}:{RESET} {value}")
+            print(f"{BOLD_GREEN}{key:<17}:{RESET} {value}")
 
-    print(f"\n                ** RAM **")
-    print(f"{BOLD_GREEN}Total RAM:{RESET} {ramInfo[0]['totalRam']:.2f} GB")
+    print(f"\n{BOLD_GREEN}►{GRAY} RAM:")
     for i, ram in enumerate(ramInfo[1:], start=1):
         connector = "└" if i == len(ramInfo[1:]) else "├"
         details = f"{ram['capacity']:.0f} GB - {ram['speed']} MHz - {ram['type']} | {ram['manufacturer']} {ram['ramModel']}"
-        print(f"{BOLD_GREEN}{connector} RAM {i:<14}:{RESET} {details}")
+        print(f"{BOLD_GREEN}{connector} #{i:<14}:{RESET} {details}")
+    print(f"{BOLD_GREEN}Total RAM:{RESET} {ramInfo[0]['totalRam']:.2f} GB")
 
-    print(f"\n               ** DISKS **")
-    print(f"{BOLD_GREEN}Total Memory:{RESET} {sum(disk['total'] for disk in diskInfo):.2f} GB")
+    print(f"\n{BOLD_GREEN}►{GRAY} DISKS:")
     for i, disk in enumerate(diskInfo, start=1):
         connector = "└" if i == len(diskInfo) else "├"
         details = f"{disk['total']:.2f} GB (Used: {disk['used']:.2f} GB - Free: {disk['free']:.2f} GB) [{disk['filesystem']}]"
-        print(f"{BOLD_GREEN}{connector} Disk {i:<13}:{RESET} {details}")
+        print(f"{BOLD_GREEN}{connector} #{i:<14}:{RESET} {details}")
+    print(f"{BOLD_GREEN}Total Memory:{RESET} {sum(disk['total'] for disk in diskInfo):.2f} GB")
+    
+    print(f"=====================================")
 def showMonitorDetails():
     monitorInfo = hardwareInfo.getMonitor()
 
@@ -237,7 +257,7 @@ def showMonitorDetails():
 
     if monitorInfo:
         for i, monitor in enumerate(monitorInfo, start=1):
-            print(f"{BOLD_GREEN}Monitor {i}:{RESET}")
+            print(f"{BOLD_GREEN}► {GRAY}Monitor {i}:{RESET}")
             details = {
                 "├ Identifier   ": monitor['displayIdentifier'],
                 "├ Name         ": monitor['monitorName'],
@@ -246,9 +266,31 @@ def showMonitorDetails():
                 "└ Output       ": monitor['output']
             }
             for key, value in details.items():
-                print(f"{BOLD_GREEN}{key:<20}:{RESET} {value}")
+                print(f"{BOLD_GREEN}{key:<17}:{RESET} {value}")
     else:
         print(f"{BOLD_RED}No monitors found.{RESET}")
+    print(f"=====================================")
+def showNetworkDetails():
+    networkData = networkInfo.getInterfaces()
+
+    print(f"=====================================")
+    print(f"         ** NETWORK DETAILS **       ")
+    print(f"=====================================")
+
+    print(f"{BOLD_GREEN}Local IP:{RESET} {networkData['localIp']}")
+    print(f"{BOLD_GREEN}Public IP:{RESET} {networkData['publicIp']}\n")
+
+    outputs = []
+    for interface in networkData['interfaces']:
+        outputs.append(f"{BOLD_GREEN}► {GRAY}Interface:{interface['interface']}")
+        outputs.append(f"{BOLD_GREEN}├ IPv4:{RESET} {interface['ipv4']}")
+        outputs.append(f"{BOLD_GREEN}├ IPv6:{RESET} {interface['ipv6']}")
+        outputs.append(f"{BOLD_GREEN}└ Netmask:{RESET} {interface['netmask']}")
+        outputs.append("")
+
+    for line in outputs[:-1]:
+        print(line)
+    
     print(f"=====================================")
 
 # Secondary functions
@@ -283,7 +325,7 @@ def main():
             elif subChoice == '2': # Cookies
                 subOption = subOptionsBrowsers()
                 browserFunctions = {
-                    '3': edge.getCookies,
+                    '3': edge.getCookies
                 }
                 if subOption in browserFunctions:
                     browserFunctions[subOption]()
@@ -313,6 +355,20 @@ def main():
             
             pauseAndClear()
 
+        # Network Scan
+        if choice == '3':
+            subOption = subOptionsNetwork()
+            
+            systemFunctions = {
+                '1': showNetworkDetails
+            }
+            if subOption in systemFunctions:
+                systemFunctions[subOption]()
+
+            elif subOption == '0': # Back
+                continue
+            
+            pauseAndClear()
         # Exit
         elif choice == '0':
             os.system('cls' if os.name == 'nt' else 'clear')
