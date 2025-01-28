@@ -1,7 +1,7 @@
 import os
 import sys
 import subprocess
-
+'''
 os.system('cls' if os.name == 'nt' else 'clear')
 print("Verifiying dependencies...")
 print("--------------------------------------")
@@ -19,7 +19,7 @@ for package in requiredPackages:
         __import__(package)
     except ImportError:
         installPackage(package)
-
+'''
 import curses
 from browsers import operaGX, chrome, edge, brave, vivaldi
 from recon import systemInfo, hardwareInfo, networkInfo
@@ -107,6 +107,24 @@ def subMenuBrowsers():
 
     curses.wrapper(menuLogic)
     return selectedOption
+def subMenuNetwork():
+    options = [
+        ("1", "IP and Interfaces"),
+        ("2", "Open Ports"),
+        ("0", "Back")
+    ]
+    currentOption = 0
+    selectedOption = None
+
+    def menuLogic(screen):
+        nonlocal selectedOption, currentOption
+        while selectedOption is None:
+            displayMenu(screen, options, currentOption, "NETWORK SCANNING")
+            key = screen.getch()
+            selectedOption, currentOption = handleInput(key, currentOption, options)
+
+    curses.wrapper(menuLogic)
+    return selectedOption
 # Sub Options (submenu in which the option activates a feature)
 def subOptionsBrowsers():
     options = [
@@ -147,23 +165,48 @@ def subOptionsSystemInformation():
 
     curses.wrapper(menuLogic)
     return selectedOption
-def subOptionsNetwork():
+def subOptionsPorts():
     options = [
-        ("1", "IP and Interfaces"),
+        ("1", "ALL"),
+        ("2", "ESTABLISHED"),
+        ("3", "LISTEN"),
+        ("4", "CLOSE_WAIT"),
+        ("5", "TIME_WAIT"),
+        ("6", "SYN"),
+        ("7", "CLOSING"),
+        ("8", "FIN_WAIT"),
+        ("9", "NONE"),
         ("0", "Back")
     ]
     currentOption = 0
     selectedOption = None
 
-    def menuLogic(screen):
+    def subMenuLogic(screen):
         nonlocal selectedOption, currentOption
         while selectedOption is None:
-            displayMenu(screen, options, currentOption, "NETWORK SCAN")
+            displayMenu(screen, options, currentOption, "PORTS")
             key = screen.getch()
             selectedOption, currentOption = handleInput(key, currentOption, options)
 
-    curses.wrapper(menuLogic)
-    return selectedOption
+    curses.wrapper(subMenuLogic)
+    if selectedOption == '0':
+        return
+
+    statesMapping = {
+        '1': None,
+        '2': ["ESTABLISHED"],
+        '3': ["LISTEN"],
+        '4': ["CLOSE_WAIT"],
+        '5': ["TIME_WAIT"],
+        '6': ["SYN"],
+        '7': ["CLOSING"],
+        '8': ["FIN_WAIT"],
+        '9': ["NONE"]
+    }
+
+    filterStates = statesMapping.get(selectedOption)
+    showOpenPortsDetails(filterStates)
+
 # Main functions
 def showSystemDetails():
     systemData = systemInfo.getDateTime()
@@ -192,6 +235,7 @@ def showSystemDetails():
     for key, value in details.items():
         print(f"{BOLD_GREEN}{key:<17}:{RESET} {value}")
     print(f"=====================================")
+    pauseAndClear()
 def showHardwareDetails():
     cpuInfo = hardwareInfo.getCpu()
     gpuInfo = hardwareInfo.getGpu()
@@ -248,6 +292,7 @@ def showHardwareDetails():
     print(f"{BOLD_GREEN}Total Memory:{RESET} {sum(disk['total'] for disk in diskInfo):.2f} GB")
     
     print(f"=====================================")
+    pauseAndClear()
 def showMonitorDetails():
     monitorInfo = hardwareInfo.getMonitor()
 
@@ -270,11 +315,12 @@ def showMonitorDetails():
     else:
         print(f"{BOLD_RED}No monitors found.{RESET}")
     print(f"=====================================")
-def showNetworkDetails():
+    pauseAndClear()
+def showInterfacesDetails():
     networkData = networkInfo.getInterfaces()
 
     print(f"=====================================")
-    print(f"         ** NETWORK DETAILS **       ")
+    print(f"        ** INTERFACES DETAILS **     ")
     print(f"=====================================")
 
     print(f"{BOLD_GREEN}Local IP:{RESET} {networkData['localIp']}")
@@ -292,6 +338,26 @@ def showNetworkDetails():
         print(line)
     
     print(f"=====================================")
+    pauseAndClear()
+def showOpenPortsDetails(filterStates=None):
+    portsData = networkInfo.getOpenPorts(filterStates=filterStates)
+
+    print(f"=====================================")
+    print(f"          ** OPEN PORTS **           ")
+    print(f"=====================================")
+
+    if not portsData:
+        print(f"{BOLD_RED}No active network connections.{RESET}")
+    else:
+        for port in portsData:
+            print(f"{BOLD_GREEN}► {GRAY}Address:{RESET} {port['Local Address']} → {port['Remote Address']}")
+            print(f"{BOLD_GREEN}├ Status:{RESET} {port['Status']}")
+            print(f"{BOLD_GREEN}├ PID:{RESET} {port['PID']}")
+            print(f"{BOLD_GREEN}└ Protocol:{RESET} {port['Protocol']}")
+            print("")
+
+    print(f"=====================================")
+    pauseAndClear()
 
 # Secondary functions
 def pauseAndClear():
@@ -352,23 +418,21 @@ def main():
 
             elif subOption == '0': # Back
                 continue
-            
-            pauseAndClear()
 
         # Network Scan
         if choice == '3':
-            subOption = subOptionsNetwork()
+            subOption = subMenuNetwork()
             
             systemFunctions = {
-                '1': showNetworkDetails
+                '1': showInterfacesDetails,
+                '2': subOptionsPorts,
             }
             if subOption in systemFunctions:
                 systemFunctions[subOption]()
 
             elif subOption == '0': # Back
                 continue
-            
-            pauseAndClear()
+        
         # Exit
         elif choice == '0':
             os.system('cls' if os.name == 'nt' else 'clear')
