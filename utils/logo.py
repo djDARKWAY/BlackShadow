@@ -1,9 +1,9 @@
 import os
-from utils.ansiColors import BOLD_GREEN, WHITE, RESET
+from utils.ansiColors import RESET
 
 def showLogo():
     os.system('cls' if os.name == 'nt' else 'clear')
-    logo = f"""
+    logo = f"""{RESET}
      ⠀⠀⠀⢀⣴⣿⣿⣿⣦
      ⠀⠀⣰⣿⡟⢻⣿⡟⢻⣧        ____  __           __   _____ __              __              
     ⠀⠀⣰⣿⣿⣇⣸⣿⣇⣸⣿       / __ )/ /___  _____/ /__/ ___// /_  ____  ____/ /_____      __

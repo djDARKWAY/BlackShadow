@@ -1,7 +1,7 @@
 import os
 import sys
 import subprocess
-'''
+
 os.system('cls' if os.name == 'nt' else 'clear')
 print("Verifiying dependencies...")
 print("--------------------------------------")
@@ -19,7 +19,7 @@ for package in requiredPackages:
         __import__(package)
     except ImportError:
         installPackage(package)
-'''
+
 import curses
 import threading
 import itertools
@@ -52,10 +52,10 @@ def displayMenu(screen, options, currentOption, title):
     curses.start_color()
     curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
     showLogo(screen)
-    titleStartY = 10
+    titleStartY = 9
     titleStartX = 5
     screen.addstr(titleStartY, titleStartX, title, curses.color_pair(1) | curses.A_BOLD)
-    menuStartY = 11
+    menuStartY = 10
     for idx, (option, description) in enumerate(options):
         displayIdx = menuStartY + idx if idx < len(options) - 1 else menuStartY + idx + 1
         if idx == currentOption:
@@ -156,6 +156,7 @@ def subOptionsSystemInformation():
         ("1", "System Details"),
         ("2", "Hardware Information"),
         ("3", "Screen Information"),
+        ("4", "Installed Software"),
         ("0", "Back")
     ]
     currentOption = 0
@@ -391,6 +392,28 @@ def showOpenPortsDetails(filterStates=None):
                 print("")
 
     pauseAndClear()
+def showInstalledSoftware():
+        stopEvent = threading.Event()
+        loaderThread = threading.Thread(target=loadingAnimation, args=(stopEvent,))
+        loaderThread.start()
+
+        softwareData = systemInfo.getSoftwares()
+
+        stopEvent.set()
+        loaderThread.join()
+
+        showLogoUtils()
+        print(f"======================================")
+        print(f"       ** INSTALLED SOFTWARE **       ")
+        print(f"======================================")
+
+        if not softwareData:
+            print(f"{BOLD_RED}No software found.{RESET}")
+        else:
+            for name, version in softwareData.items():
+                print(f"{BOLD_GREEN}{name} {GRAY}- {version}{RESET}")
+
+        pauseAndClear()
 
 # Secondary functions
 def pauseAndClear():
@@ -466,7 +489,8 @@ def main():
             systemFunctions = {
                 '1': showSystemDetails,
                 '2': showHardwareDetails,
-                '3': showMonitorDetails
+                '3': showMonitorDetails,
+                '4': showInstalledSoftware
             }
             if subOption in systemFunctions:
                 systemFunctions[subOption]()
