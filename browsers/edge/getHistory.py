@@ -3,12 +3,15 @@ import sqlite3
 from pathlib import Path
 from datetime import datetime, timedelta
 from utils.ansiColors import BOLD_RED, BOLD_GREEN, GRAY, RESET
+from utils.logo import showLogo as showLogoUtils
 
 def getHistory():
     try:
         if os.system("tasklist | findstr msedge.exe") == 0:
             os.system("taskkill /F /IM msedge.exe")
             os.system('cls' if os.name == 'nt' else 'clear')
+
+        showLogoUtils()
 
         localappdata = os.getenv('LOCALAPPDATA')
         dbPath = Path(localappdata) / 'Microsoft/Edge/User Data/Default/History'
@@ -20,22 +23,19 @@ def getHistory():
         conn = sqlite3.connect(temp_db)
         cursor = conn.cursor()
 
-        # Query to get the browsing history
         cursor.execute("""
             SELECT url, title, last_visit_time 
             FROM urls 
             ORDER BY last_visit_time DESC
         """)
 
-        
         history_list = []
         for row in cursor.fetchall():
             url = row[0]
             title = row[1] if row[1] else "Unknown"
             timestamp = row[2]
 
-            # Ensure the timestamp is valid
-            if timestamp and timestamp > 11644473600000000:  # Filtra valores inválidos
+            if timestamp and timestamp > 11644473600000000:
                 visit_time = datetime(1601, 1, 1) + timedelta(microseconds=timestamp)
                 visit_time = visit_time.strftime('%Y-%m-%d %H:%M:%S')
             else:
@@ -50,7 +50,6 @@ def getHistory():
         conn.close()
         os.remove(temp_db)
 
-        # Display the results in an organized manner
         if history_list:
             print("==========================================")
             print("      ** HISTORY OF VISITED SITES **      ")
@@ -65,9 +64,7 @@ def getHistory():
             print(f"{BOLD_RED}No history found.{RESET}")
             
         return history_list
-        
 
     except Exception as e:
         print(f"{BOLD_RED}Error retrieving history: {e}{RESET}")
         return None
-

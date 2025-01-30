@@ -21,10 +21,14 @@ for package in requiredPackages:
         installPackage(package)
 '''
 import curses
+import threading
+import itertools
+import time
+
 from browsers import operaGX, chrome, edge, brave, vivaldi
 from recon import systemInfo, hardwareInfo, networkInfo
-
 from utils.ansiColors import BOLD_RED, BOLD_GREEN, GRAY, RESET
+from utils.logo import showLogo as showLogoUtils
 
 os.system('cls' if os.name == 'nt' else 'clear')
 
@@ -210,10 +214,18 @@ def subOptionsPorts():
 
 # Main functions
 def showSystemDetails():
+    stopEvent = threading.Event()
+    loaderThread = threading.Thread(target=loadingAnimation, args=(stopEvent,))
+    loaderThread.start()
+
     systemData = systemInfo.getDateTime()
     bios = systemInfo.getBios()
     directX = systemInfo.getDirectXVersion()
 
+    stopEvent.set()
+    loaderThread.join()
+
+    showLogoUtils()
     print(f"======================================")
     print(f"         ** SYSTEM DETAILS **         ")
     print(f"======================================")
@@ -239,12 +251,20 @@ def showSystemDetails():
 
     pauseAndClear()
 def showHardwareDetails():
+    stopEvent = threading.Event()
+    loaderThread = threading.Thread(target=loadingAnimation, args=(stopEvent,))
+    loaderThread.start()
+
     cpuInfo = hardwareInfo.getCpu()
     gpuInfo = hardwareInfo.getGpu()
     ramInfo = hardwareInfo.getRam()
     diskInfo = hardwareInfo.getDisks()
     motherboardInfo = hardwareInfo.getMotherboard()
 
+    stopEvent.set()
+    loaderThread.join()
+
+    showLogoUtils()
     print(f"======================================")
     print(f"        ** HARDWARE DETAILS **        ")
     print(f"======================================")
@@ -295,8 +315,16 @@ def showHardwareDetails():
     
     pauseAndClear()
 def showMonitorDetails():
+    stopEvent = threading.Event()
+    loaderThread = threading.Thread(target=loadingAnimation, args=(stopEvent,))
+    loaderThread.start()
+
     monitorInfo = hardwareInfo.getMonitor()
 
+    stopEvent.set()
+    loaderThread.join()
+
+    showLogoUtils()
     print(f"=======================================")
     print(f"         ** MONITOR DETAILS **         ")
     print(f"=======================================")
@@ -323,6 +351,7 @@ def showMonitorDetails():
 def showInterfacesDetails():
     networkData = networkInfo.getInterfaces()
 
+    showLogoUtils()
     print(f"========================================")
     print(f"        ** INTERFACES DETAILS **        ")
     print(f"========================================")
@@ -345,6 +374,7 @@ def showInterfacesDetails():
 def showOpenPortsDetails(filterStates=None):
     portsData = networkInfo.getOpenPorts(filterStates=filterStates)
 
+    showLogoUtils()
     print(f"====================================")
     print(f"          ** OPEN PORTS **          ")
     print(f"====================================")
@@ -366,6 +396,16 @@ def showOpenPortsDetails(filterStates=None):
 def pauseAndClear():
     print(f"=====================================")
     input("Press Enter to continue...")
+    os.system('cls' if os.name == 'nt' else 'clear')
+def loadingAnimation(stopEvent):
+    showLogoUtils()
+    for char in itertools.cycle(["|", "/", "-", "\\"]):
+        if stopEvent.is_set():
+            break
+        sys.stdout.write(f"\rLoading system details... {char}")
+        sys.stdout.flush()
+        time.sleep(0.1)
+    time.sleep(1)
     os.system('cls' if os.name == 'nt' else 'clear')
 
 def main():
