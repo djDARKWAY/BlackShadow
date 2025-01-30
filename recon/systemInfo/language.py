@@ -3,7 +3,7 @@ import locale
 
 def getLanguage():
     try:
-        with open("utils/json/languages.json", "r", encoding="utf-8") as file:
+        with open("utils/jsonS/languages.json", "r", encoding="utf-8") as file:
             languages = json.load(file)
     except FileNotFoundError:
         return "Language file not found."
