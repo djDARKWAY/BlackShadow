@@ -7,15 +7,15 @@ from utils.logo import showLogo as showLogoUtils
 
 def getHistory():
     try:
-        if os.system("tasklist | findstr msedge.exe") == 0:
-            os.system("taskkill /F /IM msedge.exe")
+        if os.system("tasklist | findstr opera.exe") == 0:
+            os.system("taskkill /F /IM opera.exe")
             os.system('cls' if os.name == 'nt' else 'clear')
 
         showLogoUtils()
-        
-        dbPath = Path(os.path.expanduser("~")) / 'AppData/Local/Microsoft/Edge/User Data/Default/History'
 
-        temp_db = Path(os.getenv("TEMP")) / "Edge_History.db"
+        dbPath = Path(os.path.expanduser("~")) / 'AppData/Roaming/Opera Software/Opera GX Stable/History'
+
+        temp_db = Path(os.getenv("TEMP")) / "OperaGX_History.db"
         with open(dbPath, "rb") as src, open(temp_db, "wb") as dst:
             dst.write(src.read())
 

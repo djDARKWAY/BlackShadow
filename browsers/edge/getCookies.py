@@ -13,9 +13,8 @@ def getCookies():
 
         showLogoUtils()
 
-        localappdata = os.getenv('LOCALAPPDATA')
-        dbPath = Path(localappdata) / 'Microsoft/Edge/User Data/Default/Network/Cookies'
-        keyPath = Path(localappdata) / 'Microsoft/Edge/User Data/Local State'
+        dbPath = Path(os.path.expanduser("~")) / 'AppData/Local/Microsoft/Edge/User Data/Default/Network/Cookies'
+        keyPath = Path(os.path.expanduser("~")) / 'AppData/Local/Microsoft/Edge/User Data/Local State'
 
         cookies = rookiepy.any_browser(db_path=str(dbPath), key_path=str(keyPath), domains=None)
 

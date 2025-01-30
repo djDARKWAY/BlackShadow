@@ -1,7 +1,7 @@
 import os
 import sys
 import subprocess
-
+'''
 os.system('cls' if os.name == 'nt' else 'clear')
 print("Verifiying dependencies...")
 print("--------------------------------------")
@@ -19,12 +19,11 @@ for package in requiredPackages:
         __import__(package)
     except ImportError:
         installPackage(package)
-
+'''
 import curses
 import threading
 import itertools
 import time
-
 from browsers import operaGX, chrome, edge, brave, vivaldi
 from recon import systemInfo, hardwareInfo, networkInfo
 from utils.ansiColors import BOLD_RED, BOLD_GREEN, GRAY, RESET
@@ -471,6 +470,7 @@ def main():
                 subOption = subOptionsBrowsers()
                 browserFunctions = {
                     '3': edge.getHistory,
+                    '4': operaGX.getHistory
                 }
                 if subOption in browserFunctions:
                     browserFunctions[subOption]()
