@@ -1,7 +1,7 @@
 import os
 import sys
 import subprocess
-'''
+
 os.system('cls' if os.name == 'nt' else 'clear')
 print("Verifiying dependencies...")
 print("--------------------------------------")
@@ -19,13 +19,14 @@ for package in requiredPackages:
         __import__(package)
     except ImportError:
         installPackage(package)
-'''
+
 import curses
 import threading
 import itertools
 import time
+import re
 from browsers import operaGX, chrome, edge, brave, vivaldi
-from recon import systemInfo, hardwareInfo, networkInfo
+from recon import systemInfo, hardwareInfo, networkInfo, securityInfo
 from utils.ansiColors import BOLD_RED, BOLD_GREEN, GRAY, RESET
 from utils.logo import showLogo as showLogoUtils
 
@@ -77,6 +78,7 @@ def mainMenuControl():
         ("1", "Browser Tools"),
         ("2", "System Information"),
         ("3", "Network Scanning"),
+        ("4", "Security Analysis"),
         ("0", "Exit")
     ]
     currentOption = 0
@@ -211,6 +213,23 @@ def subOptionsPorts():
 
     filterStates = statesMapping.get(selectedOption)
     showOpenPortsDetails(filterStates)
+def subOptionsSecurity():
+    options = [
+        ("1", "Firewall and Antivirus"),
+        ("2", "User Details"),
+        ("0", "Back")
+    ]
+    currentOption = 0
+    selectedOption = None
+
+    def subMenuLogic(screen):
+        nonlocal selectedOption, currentOption
+        while selectedOption is None:
+            displayMenu(screen, options, currentOption, "SECURITY ANALYSIS")
+            key = screen.getch()
+            selectedOption, currentOption = handleInput(key, currentOption, options)
+    curses.wrapper(subMenuLogic)
+    return selectedOption
 
 # Main functions
 def showSystemDetails():
@@ -239,6 +258,7 @@ def showSystemDetails():
         "Date & time": f"{systemData['currentDate']} {systemData['currentTime']}",
         "Timezone": systemData['timezone'],
         "DirectX version": directX,
+        "Firewall": systemInfo.getFirewall(),
         "Language": systemInfo.getLanguage(),
         "Manufacturer": bios['manufacturer'],
         "Version": bios['version'],
@@ -413,7 +433,83 @@ def showInstalledSoftware():
                 print(f"{BOLD_GREEN}{name} {GRAY}- {version}{RESET}")
 
         pauseAndClear()
+def showSecurityWsFirewall():
+    stopEvent = threading.Event()
+    loaderThread = threading.Thread(target=loadingAnimation, args=(stopEvent,))
+    loaderThread.start()
 
+    firewallStatus = securityInfo.getFirewall()
+    wsStatus = securityInfo.getWindowsDefender()
+
+    stopEvent.set()
+    loaderThread.join()
+
+    showLogoUtils()
+    print(f"======================================")
+    print(f"       ** SECURITY ANALYSIS **       ")
+    print(f"======================================")
+
+    if not firewallStatus:
+        print(f"{BOLD_RED}Firewall status not found.{RESET}")
+    else:
+        print(f"{BOLD_GREEN}Firewall Status:{RESET} {GRAY}{firewallStatus}{RESET}")
+
+    if not wsStatus:
+        print(f"{BOLD_RED}Antivirus status not found.{RESET}")
+    else:
+        for key, label in {
+            "AntivirusEnabled": "Antivirus",
+            "BehaviorMonitorEnabled": "├ Behavior Monitor",
+            "DefenderSignaturesOutOfDate": "├ Defender Signatures Out of Date",
+            "IsTamperProtected": "├ Tamper Protection",
+            "RealTimeProtectionEnabled": "├ Real Time Protection",
+            "AntivirusSignatureVersion": "├ Antivirus Signature Version",
+            "AntispywareEnabled": "├ Antispyware Protection",
+            "LastFullScanTime": "├ Last Full Scan",
+            "LastQuickScanTime": "├ Last Quick Scan",
+            "IoavProtectionEnabled": "├ Malware Protection",
+            "SmartAppControlState": "├ Smart App Control",
+            "TamperProtectionSource": "├ Tamper Protection Source",
+            "TDTCapable": "└ Real Time Detection Mode"
+        }.items():
+            if key in wsStatus:
+                print(f"{BOLD_GREEN}{label}:{GRAY} {wsStatus[key]}{RESET if key == 'TDTCapable' else ''}")
+
+    pauseAndClear()
+def showUserDetails():
+    def separateUppercase(text):
+        return re.sub(r'([a-z])([A-Z])', r'\1 \2', text)
+
+    userData = securityInfo.getUsers()
+
+    showLogoUtils()  
+    print(f"=======================================")
+    print(f"       ** ACTIVE USER ACCOUNTS **      ")
+    print(f"=======================================")
+
+    if isinstance(userData, list) and not userData:
+        print("No active user accounts found.")
+        pauseAndClear()
+        return
+
+    outputs = []
+    for account in userData:
+        userName = account.get('Name', 'N/A')
+        userName = separateUppercase(userName)
+        outputs.append(f"{BOLD_GREEN}► {GRAY}User Account:{RESET} {userName}")
+
+        for key, value in account.items():
+            if key != 'Name':
+                key = separateUppercase(key)
+                outputs.append(f"{BOLD_GREEN}├ {key:<30}:{GRAY} {value}")
+        
+        outputs.append("")
+
+    for line in outputs[:-1]:
+        print(line)
+    
+    pauseAndClear()
+    
 # Secondary functions
 def pauseAndClear():
     print(f"=====================================")
@@ -424,7 +520,7 @@ def loadingAnimation(stopEvent):
     for char in itertools.cycle(["|", "/", "-", "\\"]):
         if stopEvent.is_set():
             break
-        sys.stdout.write(f"\rLoading system details... {char}")
+        sys.stdout.write(f"\rLoading... {char}")
         sys.stdout.flush()
         time.sleep(0.1)
     time.sleep(1)
@@ -486,14 +582,14 @@ def main():
         if choice == '2':
             subOption = subOptionsSystemInformation()
             
-            systemFunctions = {
+            Functions = {
                 '1': showSystemDetails,
                 '2': showHardwareDetails,
                 '3': showMonitorDetails,
                 '4': showInstalledSoftware
             }
-            if subOption in systemFunctions:
-                systemFunctions[subOption]()
+            if subOption in Functions:
+                Functions[subOption]()
 
             elif subOption == '0': # Back
                 continue
@@ -508,6 +604,20 @@ def main():
             }
             if subOption in systemFunctions:
                 systemFunctions[subOption]()
+
+            elif subOption == '0': # Back
+                continue
+        
+        # Security Analysis
+        if choice == '4':
+            subOption = subOptionsSecurity()
+            
+            Functions = {
+                '1': showSecurityWsFirewall,
+                '2': showUserDetails
+            }
+            if subOption in Functions:
+                Functions[subOption]()
 
             elif subOption == '0': # Back
                 continue

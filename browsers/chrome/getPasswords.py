@@ -56,7 +56,6 @@ def getPasswords():
 
         for line in outputs[:-1]:
             print(line)
-        print("=====================================")
 
         conn.close()
     except Exception as e:
