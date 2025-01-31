@@ -1,7 +1,7 @@
 import os
 import sys
 import subprocess
-
+'''
 os.system('cls' if os.name == 'nt' else 'clear')
 print("Verifiying dependencies...")
 print("--------------------------------------")
@@ -19,7 +19,7 @@ for package in requiredPackages:
         __import__(package)
     except ImportError:
         installPackage(package)
-
+'''
 import curses
 import threading
 import itertools
@@ -27,7 +27,7 @@ import time
 import re
 from browsers import operaGX, chrome, edge, brave, vivaldi
 from recon import systemInfo, hardwareInfo, networkInfo, securityInfo
-from utils.ansiColors import BOLD_RED, BOLD_GREEN, GRAY, RESET
+from utils.ansiColors import BOLD_RED, BOLD_YELLOW, BOLD_GREEN, GRAY, RESET
 from utils.logo import showLogo as showLogoUtils
 
 os.system('cls' if os.name == 'nt' else 'clear')
@@ -117,6 +117,7 @@ def subMenuNetwork():
     options = [
         ("1", "IP and Interfaces"),
         ("2", "Open Ports"),
+        ("3", "Wifi Passwords"),
         ("0", "Back")
     ]
     currentOption = 0
@@ -258,7 +259,6 @@ def showSystemDetails():
         "Date & time": f"{systemData['currentDate']} {systemData['currentTime']}",
         "Timezone": systemData['timezone'],
         "DirectX version": directX,
-        "Firewall": systemInfo.getFirewall(),
         "Language": systemInfo.getLanguage(),
         "Manufacturer": bios['manufacturer'],
         "Version": bios['version'],
@@ -430,7 +430,7 @@ def showInstalledSoftware():
             print(f"{BOLD_RED}No software found.{RESET}")
         else:
             for name, version in softwareData.items():
-                print(f"{BOLD_GREEN}{name} {GRAY}- {version}{RESET}")
+                print(f"{BOLD_GREEN}{name}{GRAY} - {version}{RESET}")
 
         pauseAndClear()
 def showSecurityWsFirewall():
@@ -473,14 +473,21 @@ def showSecurityWsFirewall():
             "TDTCapable": "└ Real Time Detection Mode"
         }.items():
             if key in wsStatus:
-                print(f"{BOLD_GREEN}{label}:{GRAY} {wsStatus[key]}{RESET if key == 'TDTCapable' else ''}")
+                print(f"{BOLD_GREEN}{label}:{RESET} {wsStatus[key]}{RESET if key == 'TDTCapable' else ''}")
 
     pauseAndClear()
 def showUserDetails():
     def separateUppercase(text):
         return re.sub(r'([a-z])([A-Z])', r'\1 \2', text)
 
+    stopEvent = threading.Event()
+    loaderThread = threading.Thread(target=loadingAnimation, args=(stopEvent,))
+    loaderThread.start()
+
     userData = securityInfo.getUsers()
+
+    stopEvent.set()
+    loaderThread.join()
 
     showLogoUtils()  
     print(f"=======================================")
@@ -501,13 +508,54 @@ def showUserDetails():
         for key, value in account.items():
             if key != 'Name':
                 key = separateUppercase(key)
-                outputs.append(f"{BOLD_GREEN}├ {key:<30}:{GRAY} {value}")
+                outputs.append(f"{BOLD_GREEN}├ {key:<30}:{RESET} {value}")
         
         outputs.append("")
 
     for line in outputs[:-1]:
         print(line)
     
+    pauseAndClear()
+def showWifiPasswords():
+    stopEvent = threading.Event()
+    loaderThread = threading.Thread(target=loadingAnimation, args=(stopEvent,))
+    loaderThread.start()
+    
+    wifiData = networkInfo.getWifiPasswords()
+    
+    stopEvent.set()
+    loaderThread.join()
+
+    showLogoUtils()
+    print(f"=======================================")
+    print(f"          ** Wi-Fi NETWORKS **         ")
+    print(f"=======================================")
+
+    if "error" in wifiData:
+        print(f"{BOLD_RED}Error: {wifiData['error']}{RESET}")
+    elif not wifiData:
+        print(f"{BOLD_RED}No stored Wi-Fi networks found.{RESET}")
+    else:
+        categories = {
+            "Protected Wi-Fi": (BOLD_GREEN, []),
+            "Free Wi-Fi": (BOLD_YELLOW, []),
+            "Failed to retrieve": (BOLD_RED, [])
+        }
+
+        for wifi in wifiData:
+            ssid, password = wifi["SSID"], wifi["Password"]
+            key = "Free Wi-Fi" if password == "-" else "Failed to retrieve" if password in ["Failed", "Error"] else "Protected Wi-Fi"
+            categories[key][1].append((ssid, password))
+
+        for title, (color, networks) in categories.items():
+            if networks:
+                print(f"\n{color}{title}:{RESET}")
+                for ssid, password in networks:
+                    if title == "Protected Wi-Fi":
+                        print(f"{color}SSID: {RESET}{ssid:<32}: {RESET}{password}{RESET}")
+                    else:
+                        print(f"{color}SSID: {RESET}{ssid}{RESET}")
+
     pauseAndClear()
     
 # Secondary functions
@@ -601,6 +649,7 @@ def main():
             systemFunctions = {
                 '1': showInterfacesDetails,
                 '2': subOptionsPorts,
+                '3': showWifiPasswords
             }
             if subOption in systemFunctions:
                 systemFunctions[subOption]()
