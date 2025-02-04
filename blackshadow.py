@@ -159,6 +159,7 @@ def subOptionsSystemInformation():
         ("2", "Hardware Information"),
         ("3", "Screen Information"),
         ("4", "Installed Software"),
+        ("5", "System Logs"),
         ("0", "Back")
     ]
     currentOption = 0
@@ -429,10 +430,38 @@ def showInstalledSoftware():
         if not softwareData:
             print(f"{BOLD_RED}No software found.{RESET}")
         else:
-            for name, version in softwareData.items():
-                print(f"{BOLD_GREEN}{name}{GRAY} - {version}{RESET}")
+            for software in softwareData:
+                print(f"{BOLD_GREEN}{software['name']}{GRAY} - {software['version']}{RESET}")
+
 
         pauseAndClear()
+def showLogsDetails():
+    stopEvent = threading.Event()
+    loaderThread = threading.Thread(target=loadingAnimation, args=(stopEvent,))
+    loaderThread.start()
+
+    logsData = systemInfo.getSystemLogs()
+
+    stopEvent.set()
+    loaderThread.join()
+
+    showLogoUtils()
+    print(f"======================================")
+    print(f"          ** SYSTEM LOGS **           ")
+    print(f"======================================")
+
+    if not logsData:
+        print(f"{BOLD_RED}No logs found.{RESET}")
+    else:
+        for log in logsData:
+            print(f"{BOLD_GREEN}► {GRAY}Time:{RESET} {log['time']}")
+            print(f"{BOLD_GREEN}├ Source:{RESET} {log['source']}")
+            print(f"{BOLD_GREEN}├ Event ID:{RESET} {log['event_id']}")
+            print(f"{BOLD_GREEN}├ Message:{RESET} {log['message']}")
+            print(f"{BOLD_GREEN}└ Category:{RESET} {log['category']}")
+            print()
+
+    pauseAndClear()
 def showSecurityWsFirewall():
     stopEvent = threading.Event()
     loaderThread = threading.Thread(target=loadingAnimation, args=(stopEvent,))
@@ -634,7 +663,8 @@ def main():
                 '1': showSystemDetails,
                 '2': showHardwareDetails,
                 '3': showMonitorDetails,
-                '4': showInstalledSoftware
+                '4': showInstalledSoftware,
+                '5': showLogsDetails
             }
             if subOption in Functions:
                 Functions[subOption]()

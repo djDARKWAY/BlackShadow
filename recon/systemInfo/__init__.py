@@ -8,3 +8,4 @@ from .language import getLanguage
 from .bios import getBios
 from .directX import getDirectXVersion
 from .softwares import getSoftwares
+from .log import getSystemLogs
