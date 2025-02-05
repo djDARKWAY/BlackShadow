@@ -1,7 +1,17 @@
 import subprocess
 import re
 
+def isWlanServiceRunning():
+    try:
+        result = subprocess.check_output(["sc", "query", "wlansvc"], universal_newlines=True, encoding="utf-8", errors="ignore")
+        return "RUNNING" in result
+    except subprocess.CalledProcessError:
+        return False
+
 def getWifiPasswords():
+    if not isWlanServiceRunning():
+        return {"error": "The WLAN AutoConfig (wlansvc) service is not running. Please start it to retrieve Wi-Fi networks."}
+
     try:
         command = ["netsh", "wlan", "show", "profiles"]
         output = subprocess.check_output(command, universal_newlines=True, encoding="utf-8", errors="ignore")
@@ -29,7 +39,4 @@ def getWifiPasswords():
         return wifiCredentials
 
     except Exception as e:
-        return {"error": str(e)}
-
-if __name__ == "__main__":
-    print(getWifiPasswords())
+        return {"error": f"Error executing netsh command: {str(e)}"}

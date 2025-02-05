@@ -75,10 +75,10 @@ def handleInput(key, currentOption, options):
     return None, currentOption
 def mainMenuControl():
     options = [
-        ("1", "Browser Tools"),
-        ("2", "System Information"),
-        ("3", "Network Scanning"),
-        ("4", "Security Analysis"),
+        ("1", "Web Forensics"),
+        ("2", "System Overview"),
+        ("3", "Network Insights"),
+        ("4", "Security Audit"),
         ("0", "Exit")
     ]
     currentOption = 0
@@ -96,9 +96,9 @@ def mainMenuControl():
 # Sub Menus (intermediary between a menu and final options to activate a feature)
 def subMenuBrowsers():
     options = [
-        ("1", "Passwords"),
-        ("2", "Cookies"),
-        ("3", "History"),
+        ("1", "Password Extraction"),
+        ("2", "Tracking Data (Cookies)"),
+        ("3", "Browsing History"),
         ("0", "Back")
     ]
     currentOption = 0
@@ -107,7 +107,7 @@ def subMenuBrowsers():
     def menuLogic(screen):
         nonlocal selectedOption, currentOption
         while selectedOption is None:
-            displayMenu(screen, options, currentOption, "TOOLS")
+            displayMenu(screen, options, currentOption, "WEB FORENSICS")
             key = screen.getch()
             selectedOption, currentOption = handleInput(key, currentOption, options)
 
@@ -115,9 +115,9 @@ def subMenuBrowsers():
     return selectedOption
 def subMenuNetwork():
     options = [
-        ("1", "IP and Interfaces"),
-        ("2", "Open Ports"),
-        ("3", "Wifi Passwords"),
+        ("1", "IP & Network Interfaces"),
+        ("2", "Port Scanning"),
+        ("3", "Wifi Credentials"),
         ("0", "Back")
     ]
     currentOption = 0
@@ -126,7 +126,7 @@ def subMenuNetwork():
     def menuLogic(screen):
         nonlocal selectedOption, currentOption
         while selectedOption is None:
-            displayMenu(screen, options, currentOption, "NETWORK SCANNING")
+            displayMenu(screen, options, currentOption, "NETWORK INSIGHTS")
             key = screen.getch()
             selectedOption, currentOption = handleInput(key, currentOption, options)
 
@@ -156,9 +156,9 @@ def subOptionsBrowsers():
 def subOptionsSystemInformation():
     options = [
         ("1", "System Details"),
-        ("2", "Hardware Information"),
-        ("3", "Screen Information"),
-        ("4", "Installed Software"),
+        ("2", "Hardware Specs"),
+        ("3", "Screen Overview"),
+        ("4", "Software Inventory"),
         ("5", "System Logs"),
         ("0", "Back")
     ]
@@ -168,7 +168,7 @@ def subOptionsSystemInformation():
     def menuLogic(screen):
         nonlocal selectedOption, currentOption
         while selectedOption is None:
-            displayMenu(screen, options, currentOption, "SYSTEM INFORMATION")
+            displayMenu(screen, options, currentOption, "SYSTEM OVERVIEW")
             key = screen.getch()
             selectedOption, currentOption = handleInput(key, currentOption, options)
 
@@ -217,8 +217,8 @@ def subOptionsPorts():
     showOpenPortsDetails(filterStates)
 def subOptionsSecurity():
     options = [
-        ("1", "Firewall and Antivirus"),
-        ("2", "User Details"),
+        ("1", "Firewall & Antivirus"),
+        ("2", "User Profile"),
         ("0", "Back")
     ]
     currentOption = 0
@@ -227,7 +227,7 @@ def subOptionsSecurity():
     def subMenuLogic(screen):
         nonlocal selectedOption, currentOption
         while selectedOption is None:
-            displayMenu(screen, options, currentOption, "SECURITY ANALYSIS")
+            displayMenu(screen, options, currentOption, "SECURITY AUDIT")
             key = screen.getch()
             selectedOption, currentOption = handleInput(key, currentOption, options)
     curses.wrapper(subMenuLogic)
@@ -370,7 +370,14 @@ def showMonitorDetails():
 
     pauseAndClear()
 def showInterfacesDetails():
+    stopEvent = threading.Event()
+    loaderThread = threading.Thread(target=loadingAnimation, args=(stopEvent,))
+    loaderThread.start()
+
     networkData = networkInfo.getInterfaces()
+
+    stopEvent.set()
+    loaderThread.join()
 
     showLogoUtils()
     print(f"========================================")
@@ -393,7 +400,14 @@ def showInterfacesDetails():
     
     pauseAndClear()
 def showOpenPortsDetails(filterStates=None):
+    stopEvent = threading.Event()
+    loaderThread = threading.Thread(target=loadingAnimation, args=(stopEvent,))
+    loaderThread.start()
+
     portsData = networkInfo.getOpenPorts(filterStates=filterStates)
+
+    stopEvent.set()
+    loaderThread.join()
 
     showLogoUtils()
     print(f"====================================")
@@ -481,7 +495,7 @@ def showSecurityWsFirewall():
     if not firewallStatus:
         print(f"{BOLD_RED}Firewall status not found.{RESET}")
     else:
-        print(f"{BOLD_GREEN}Firewall Status:{RESET} {GRAY}{firewallStatus}{RESET}")
+        print(f"{BOLD_GREEN}Firewall Status: {RESET}{firewallStatus}")
 
     if not wsStatus:
         print(f"{BOLD_RED}Antivirus status not found.{RESET}")
