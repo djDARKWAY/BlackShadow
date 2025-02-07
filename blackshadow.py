@@ -1,7 +1,7 @@
 import os
 import sys
 import subprocess
-'''
+
 os.system('cls' if os.name == 'nt' else 'clear')
 print("Verifiying dependencies...")
 print("--------------------------------------")
@@ -19,7 +19,7 @@ for package in requiredPackages:
         __import__(package)
     except ImportError:
         installPackage(package)
-'''
+
 import curses
 import threading
 import itertools
