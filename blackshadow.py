@@ -384,11 +384,12 @@ def showInterfacesDetails():
     print(f"        ** INTERFACES DETAILS **        ")
     print(f"========================================")
 
+    print(f"{BOLD_GREEN}{networkData['geoData']['isp']}")
     print(f"{BOLD_GREEN}├ Local:{RESET} {networkData['localIp']}")
     print(f"{BOLD_GREEN}├ IPv4:{RESET} {networkData['publicIpv4']}")
     print(f"{BOLD_GREEN}└ IPv6:{RESET} {networkData['publicIpv6']}")
     print(f"{BOLD_GREEN}Location  :{RESET} {networkData['geoData']['city']}, {networkData['geoData']['region']}, {networkData['geoData']['country']}")
-    print(f"{BOLD_GREEN}ISP/Org   :{RESET} {networkData['geoData']['isp']}\n")
+    print(f"{BOLD_GREEN}Coords.   :{RESET} {networkData['geoData']['lat']}, {networkData['geoData']['lon']} {GRAY}(Zip code: {networkData['geoData']['zip']})\n")
 
     outputs = []
     for interface in networkData['interfaces']:

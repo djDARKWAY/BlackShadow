@@ -15,34 +15,41 @@ def getInterfaces():
             s.close()
 
     def getPublicIpAndGeo():
-        services = [
-            ("https://ipinfo.io/json", "ip", "org", "country", "region", "city"),
-            ("http://ip-api.com/json", "query", "isp", "country", "regionName", "city"),
-            ("https://api64.ipify.org?format=json", "ip", None, None, None, None)
-        ]
         publicIpv4, publicIpv6 = "-", "-"
-        geoData = {"isp": "-", "country": "-", "region": "-", "city": "-"}
-        for url, ip_key, isp_key, country_key, region_key, city_key in services:
-            try:
-                response = requests.get(url, timeout=5)
-                if response.status_code == 200:
-                    data = response.json()
-                    ip = data.get(ip_key, "-")
-                    if ":" in ip:
-                        publicIpv6 = ip
-                    else:
-                        publicIpv4 = ip
-                    if isp_key:
-                        geoData.update({
-                            "isp": data.get(isp_key, "-"),
-                            "country": data.get(country_key, "-"),
-                            "region": data.get(region_key, "-"),
-                            "city": data.get(city_key, "-")
-                        })
-                    if publicIpv4 != "-" and publicIpv6 != "-":
-                        break
-            except requests.RequestException:
-                continue
+        geoData = {"isp": "-", "country": "-", "region": "-", "city": "-", "lat": "-", "lon": "-", "zip": "-"}
+
+        try:
+            response = requests.get("https://ipinfo.io/json", timeout=5)
+            if response.status_code == 200:
+                data = response.json()
+                publicIpv4 = data.get("ip", "-")
+                geoData["isp"] = data.get("org", "-")
+        except requests.RequestException:
+            pass
+
+        try:
+            response = requests.get("https://api64.ipify.org?format=json", timeout=5)
+            if response.status_code == 200:
+                data = response.json()
+                publicIpv6 = data.get("ip", "-")
+        except requests.RequestException:
+            pass
+
+        try:
+            response = requests.get("http://ip-api.com/json", timeout=5)
+            if response.status_code == 200:
+                data = response.json()
+                geoData.update({
+                    "country": data.get("country", "-"),
+                    "region": data.get("regionName", "-"),
+                    "city": data.get("city", "-"),
+                    "lat": data.get("lat", "-"),
+                    "lon": data.get("lon", "-"),
+                    "zip": data.get("zip", "-")
+                })
+        except requests.RequestException:
+            pass
+
         return publicIpv4, publicIpv6, geoData
 
     def getNetworkInterfaces():
@@ -55,12 +62,7 @@ def getInterfaces():
                     netmask = addr.netmask if hasattr(addr, 'netmask') else "-"
                 elif addr.family == socket.AF_INET6:
                     ipv6 = addr.address
-            interfaces.append({
-                "interface": interface,
-                "ipv4": ipv4,
-                "ipv6": ipv6,
-                "netmask": netmask
-            })
+            interfaces.append({"interface": interface, "ipv4": ipv4, "ipv6": ipv6, "netmask": netmask})
         return interfaces
 
     localIp = getLocalIp()
