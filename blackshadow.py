@@ -30,8 +30,6 @@ from recon import systemInfo, hardwareInfo, networkInfo, securityInfo
 from utils.ansiColors import BOLD_RED, BOLD_YELLOW, BOLD_GREEN, GRAY, RESET
 from utils.logo import showLogo as showLogoUtils
 
-os.system('cls' if os.name == 'nt' else 'clear')
-
 # Logo
 def showLogo(screen):
     logo = r"""
@@ -115,9 +113,10 @@ def subMenuBrowsers():
     return selectedOption
 def subMenuNetwork():
     options = [
-        ("1", "IP & Network Interfaces"),
+        ("1", "Network Interfaces"),
         ("2", "Port Scanning"),
         ("3", "Wifi Credentials"),
+        ("4", "Geolocation"),
         ("0", "Back")
     ]
     currentOption = 0
@@ -384,13 +383,6 @@ def showInterfacesDetails():
     print(f"        ** INTERFACES DETAILS **        ")
     print(f"========================================")
 
-    print(f"{BOLD_GREEN}{networkData['geoData']['isp']}")
-    print(f"{BOLD_GREEN}├ Local:{RESET} {networkData['localIp']}")
-    print(f"{BOLD_GREEN}├ IPv4:{RESET} {networkData['publicIpv4']}")
-    print(f"{BOLD_GREEN}└ IPv6:{RESET} {networkData['publicIpv6']}")
-    print(f"{BOLD_GREEN}Location  :{RESET} {networkData['geoData']['city']}, {networkData['geoData']['region']}, {networkData['geoData']['country']}")
-    print(f"{BOLD_GREEN}Coords.   :{RESET} {networkData['geoData']['lat']}, {networkData['geoData']['lon']} {GRAY}(Zip code: {networkData['geoData']['zip']})\n")
-
     outputs = []
     for interface in networkData['interfaces']:
         outputs.append(f"{BOLD_GREEN}► {GRAY}Interface:{interface['interface']}")
@@ -552,10 +544,11 @@ def showUserDetails():
         userName = separateUppercase(userName)
         outputs.append(f"{BOLD_GREEN}► {GRAY}User Account:{RESET} {userName}")
 
-        for key, value in account.items():
+        for idx, (key, value) in enumerate(account.items()):
             if key != 'Name':
                 key = separateUppercase(key)
-                outputs.append(f"{BOLD_GREEN}├ {key:<30}:{RESET} {value}")
+                connector = "└" if idx == len(account.items()) - 1 else "├"
+                outputs.append(f"{BOLD_GREEN}{connector} {key:<30}:{RESET} {value}")
         
         outputs.append("")
 
@@ -604,7 +597,34 @@ def showWifiPasswords():
                         print(f"{color}SSID: {RESET}{ssid}{RESET}")
 
     pauseAndClear()
+def showGeoLocationDetails():
+    stopEvent = threading.Event()
+    loaderThread = threading.Thread(target=loadingAnimation, args=(stopEvent,))
+    loaderThread.start()
+
+    networkData = networkInfo.getGeoLocation()
+
+    stopEvent.set()
+    loaderThread.join()
+
+    showLogoUtils()
+    print(f"========================================")
+    print(f"        ** GEOLOCATION DETAILS **       ")
+    print(f"========================================")
+
+    print(f"{BOLD_GREEN}Local:{RESET} {networkData['localIp']}")
+    print(f"{BOLD_GREEN}IPv4:{RESET} {networkData['publicIpv4']}")
+    print(f"{BOLD_GREEN}IPv6:{RESET} {networkData['publicIpv6']}\n")
     
+    print(f"{BOLD_GREEN}{networkData['geoData']['isp']}")
+    print(f"{BOLD_GREEN}Location    : {RESET}{networkData['geoData']['city']}, "
+        f"{networkData['geoData']['region']}, {networkData['geoData']['country']}")
+    print(f"{BOLD_GREEN}Coordinates : {RESET}{networkData['geoData']['lat']}, "
+        f"{networkData['geoData']['lon']}")
+    print(f"{BOLD_GREEN}Zip Code    : {RESET}{networkData['geoData']['zip']}")
+    
+    pauseAndClear()
+
 # Secondary functions
 def pauseAndClear():
     print(f"=====================================")
@@ -620,12 +640,25 @@ def loadingAnimation(stopEvent):
         time.sleep(0.1)
     time.sleep(1)
     os.system('cls' if os.name == 'nt' else 'clear')
+def createDxDiagFile():
+    stopEvent = threading.Event()
+    loaderThread = threading.Thread(target=loadingAnimation, args=(stopEvent,))
+    loaderThread.start()
+
+    if not os.path.exists("utils/dxdiag/dxdiag_output.txt"):
+        subprocess.run("dxdiag /t utils/dxdiag/dxdiag_output.txt", shell=True, check=True)
+
+    stopEvent.set()
+    loaderThread.join()
+
+createDxDiagFile()
+os.system('cls' if os.name == 'nt' else 'clear')
 
 def main():
     while True:
         choice = mainMenuControl()
         
-        # Browser Tools
+        # Web Forensics
         if choice == '1':
             subChoice = subMenuBrowsers()
 
@@ -673,7 +706,7 @@ def main():
             elif subChoice == '0': # Back
                 continue
         
-        # System Information
+        # System Overview
         if choice == '2':
             subOption = subOptionsSystemInformation()
             
@@ -690,14 +723,15 @@ def main():
             elif subOption == '0': # Back
                 continue
 
-        # Network Scan
+        # Network Insights
         if choice == '3':
             subOption = subMenuNetwork()
             
             systemFunctions = {
                 '1': showInterfacesDetails,
                 '2': subOptionsPorts,
-                '3': showWifiPasswords
+                '3': showWifiPasswords,
+                '4': showGeoLocationDetails
             }
             if subOption in systemFunctions:
                 systemFunctions[subOption]()
@@ -705,7 +739,7 @@ def main():
             elif subOption == '0': # Back
                 continue
         
-        # Security Analysis
+        # Security Audits
         if choice == '4':
             subOption = subOptionsSecurity()
             
@@ -721,6 +755,8 @@ def main():
         
         # Exit
         elif choice == '0':
+            if os.path.exists("utils/dxdiag/dxdiag_output.txt"):
+                os.remove("utils/dxdiag/dxdiag_output.txt")
             os.system('cls' if os.name == 'nt' else 'clear')
             break
 

@@ -11,8 +11,7 @@ def getUsers():
         userAccounts = []
         accountData = result.split("\n\n")
 
-        # Mapeamento de chaves mais legíveis
-        label_mapping = {
+        labelMapping = {
             "Accountexpires": "Account Expires",
             "Description": "Description",
             "Enabled": "Enabled",
@@ -38,8 +37,8 @@ def getUsers():
                     key = key.strip()
                     value = value.strip()
 
-                    key = label_mapping.get(key, key)
-                    userInfo[key] = value if value else "N/A"
+                    key = labelMapping.get(key, key)
+                    userInfo[key] = value if value else "-"
 
             if 'Enabled' in userInfo and userInfo.get('Enabled') == 'True':
                 userAccounts.append(userInfo)

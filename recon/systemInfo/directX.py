@@ -1,16 +1,15 @@
 import subprocess
 import re
+import os
 
 def getDirectXVersion():
     try:
-        subprocess.check_output("dxdiag /t dxdiag_output.txt", shell=True, text=True)
-        
-        with open("dxdiag_output.txt", "r") as file:
-            dxdiagData = file.read()
+        dxdiagFile = "./utils/dxdiag/dxdiag_output.txt"
+
+        with open(dxdiagFile, "r") as file:
+            dxdiagData = file.readlines()
 
         match = re.search(r"DirectX Version:\s*(DirectX\s*\d+)", dxdiagData)
-
-        subprocess.run("del dxdiag_output.txt", shell=True)
 
         if match:
             return match.group(1).replace("DirectX ", "")

@@ -12,16 +12,14 @@ def getSystemLogs(log_type="System", num_records=100):
         if not events:
             break
         for event in events:
-            # Try to get a more detailed description of the event
             try:
                 description = win32evtlogutil.FormatMessage(event, hand)
             except:
-                description = None  # If unable to format
+                description = None
 
-            # If no description, use event.StringInserts data
             if not description:
                 if event.StringInserts:
-                    description = "|".join(event.StringInserts)  # Join the lines correctly
+                    description = "|".join(event.StringInserts)
                 else:
                     description = "No description available"
 
