@@ -647,6 +647,9 @@ def createDxDiagFile():
 
     if not os.path.exists("utils/dxdiag/dxdiag_output.txt"):
         subprocess.run("dxdiag /t utils/dxdiag/dxdiag_output.txt", shell=True, check=True)
+    else:
+        os.remove("utils/dxdiag/dxdiag_output.txt")
+        subprocess.run("dxdiag /t utils/dxdiag/dxdiag_output.txt", shell=True, check=True)
 
     stopEvent.set()
     loaderThread.join()
@@ -681,7 +684,8 @@ def main():
             elif subChoice == '2': # Cookies
                 subOption = subOptionsBrowsers()
                 browserFunctions = {
-                    '3': edge.getCookies
+                    '3': edge.getCookies,
+                    '4': operaGX.getCookies
                 }
                 if subOption in browserFunctions:
                     browserFunctions[subOption]()
